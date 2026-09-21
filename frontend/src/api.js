@@ -51,6 +51,12 @@ export const createTemplate = (file) => {
   });
 };
 
+export const updateTemplate = (template) =>
+  requestJson(`/api/templates/${template.id}`, {
+    method: 'PUT',
+    body: JSON.stringify(template),
+  });
+
 export const deleteTemplate = async (templateId) => {
   await requestJson(`/api/templates/${templateId}`, {
     method: 'DELETE',

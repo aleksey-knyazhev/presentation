@@ -3,6 +3,7 @@ import {
   createTemplate,
   deleteTemplate as deleteTemplateRequest,
   findTemplates,
+  updateTemplate,
 } from '../api.js';
 
 export default function useTemplates() {
@@ -38,9 +39,32 @@ export default function useTemplates() {
     }
   };
 
+  const renameTemplate = async (templateId, title) => {
+    const nextTitle = title || 'Новый шаблон';
+    setTemplates((currentTemplates) =>
+      currentTemplates.map((template) =>
+        template.id === templateId ? { ...template, title: nextTitle } : template
+      )
+    );
+
+    try {
+      const savedTemplate = await updateTemplate({ id: templateId, title: nextTitle });
+      setTemplates((currentTemplates) =>
+        currentTemplates.map((template) =>
+          template.id === templateId ? savedTemplate : template
+        )
+      );
+      return savedTemplate;
+    } catch (error) {
+      console.error('Ошибка переименования шаблона', error);
+      return null;
+    }
+  };
+
   return {
     addTemplate,
     deleteTemplate,
+    renameTemplate,
     templates,
   };
 }

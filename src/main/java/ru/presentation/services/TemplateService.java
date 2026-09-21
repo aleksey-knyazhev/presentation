@@ -47,6 +47,16 @@ public class TemplateService {
     }
 
     @Transactional
+    public Template update(Long id, Template updatedTemplate) {
+        Template template = templateRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Шаблон не найден: " + id));
+
+        template.setTitle(resolveTitle(updatedTemplate.getTitle()));
+        template.setDescription(updatedTemplate.getDescription());
+        return templateRepository.save(template);
+    }
+
+    @Transactional
     public Template createFromFile(MultipartFile file) throws IOException {
         String fileName = file.getOriginalFilename();
         if (fileName == null || !fileName.toLowerCase().endsWith(".potx")) {
@@ -72,5 +82,13 @@ public class TemplateService {
     @Transactional
     public void delete(Long id) {
         templateRepository.deleteById(id);
+    }
+
+    private String resolveTitle(String title) {
+        if (title == null || title.isBlank()) {
+            return "Новый шаблон";
+        }
+
+        return title;
     }
 }

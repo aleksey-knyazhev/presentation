@@ -136,6 +136,15 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.template-title-input {
+  width: 420px;
+}
+
+.template-title-input:focus {
+  border-color: #2563eb;
+  outline: 2px solid rgba(37, 99, 235, 0.16);
+}
+
 .template-viewer-nav {
   flex-wrap: wrap;
   margin-top: 10px;

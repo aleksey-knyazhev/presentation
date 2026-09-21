@@ -1,14 +1,34 @@
+import { useEffect, useState } from 'react';
+
 export default function TemplateViewer({
   isPreviewLoading,
   onClose,
   onNextSlide,
   onPreviousSlide,
+  onRenameTemplate,
   pageCount,
   previewUrl,
   slideIndex,
   template,
 }) {
   const slideCount = pageCount || template.slideCount || 1;
+  const [title, setTitle] = useState(template.title);
+
+  useEffect(() => {
+    setTitle(template.title);
+  }, [template.title]);
+
+  const saveTitle = () => {
+    const nextTitle = title.trim() || 'Новый шаблон';
+    setTitle(nextTitle);
+    onRenameTemplate(nextTitle);
+  };
+
+  const handleTitleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      event.currentTarget.blur();
+    }
+  };
 
   return (
     <main className="app-shell">
@@ -17,7 +37,14 @@ export default function TemplateViewer({
           <div>
             <h1>Шаблон</h1>
             <div className="template-viewer-nav">
-              <span className="template-title">{template.title}</span>
+              <input
+                className="template-title template-title-input"
+                aria-label="Название шаблона"
+                value={title}
+                onBlur={saveTitle}
+                onChange={(event) => setTitle(event.target.value)}
+                onKeyDown={handleTitleKeyDown}
+              />
             </div>
           </div>
           <div className="header-actions">

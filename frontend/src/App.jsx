@@ -34,6 +34,7 @@ export default function App() {
   const {
     addTemplate,
     deleteTemplate,
+    renameTemplate,
     templates,
   } = useTemplates();
 
@@ -144,6 +145,18 @@ export default function App() {
     loadTemplatePreview(previewTemplate, templateSlideIndex + 1);
   };
 
+  const renameActiveTemplate = async (title) => {
+    if (!previewTemplate) {
+      return;
+    }
+
+    setPreviewTemplate((currentTemplate) => ({ ...currentTemplate, title }));
+    const savedTemplate = await renameTemplate(previewTemplate.id, title);
+    if (savedTemplate) {
+      setPreviewTemplate(savedTemplate);
+    }
+  };
+
   if (!activePresentation) {
     if (previewTemplate) {
       return (
@@ -153,6 +166,7 @@ export default function App() {
           pageCount={templatePageCount}
           slideIndex={templateSlideIndex}
           isPreviewLoading={isPreviewLoading}
+          onRenameTemplate={renameActiveTemplate}
           onClose={closeTemplateViewer}
           onPreviousSlide={previousTemplateSlide}
           onNextSlide={nextTemplateSlide}
