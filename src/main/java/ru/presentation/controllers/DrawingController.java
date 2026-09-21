@@ -1,12 +1,11 @@
 package ru.presentation.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.presentation.dto.DrawingDto;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/drawings")
 public class DrawingController {
@@ -14,20 +13,27 @@ public class DrawingController {
     @PostMapping
     public ResponseEntity<String> saveDrawing(@RequestBody DrawingDto dto) {
         try {
-            String base64Image = dto.getImage().split(",")[1];
+            String rawImage = dto.getImage();
+            String base64Image = rawImage.contains(",") ? rawImage.split(",")[1] : rawImage;
+
             byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Image);
 
+            // Создаем папку, если её нет
+            java.io.File outputFile = new java.io.File("./uploads/");
+            if (!outputFile.exists()) {
+                outputFile.mkdirs();
+            }
+
+            // Имя файла (сервис генерации PPTX будет искать именно файлы с префиксом drawing_ и расширением .png)
             String fileName = "drawing_" + java.util.UUID.randomUUID() + ".png";
-            java.io.File outputFile = new java.io.File("./uploads/" + fileName);
-            outputFile.getParentFile().mkdirs();
-            java.nio.file.Files.write(outputFile.toPath(), imageBytes);
+            java.nio.file.Files.write(new java.io.File(outputFile, fileName).toPath(), imageBytes);
 
-            // Здесь можно вывести или записать в БД полученный dto.getText()
-            System.out.println("Полученный текст: " + dto.getText());
+            log.info("Полученный текст: {}", dto.getText());
 
-            return ResponseEntity.ok("Файл " + fileName + " и текст сохранены!");
+            return ResponseEntity.ok("Файл " + fileName + " успешно сохранен на сервере!");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Ошибка: " + e.getMessage());
+            log.error("Ошибка при сохранении рисунка", e);
+            return ResponseEntity.internalServerError().body("Ошибка при сохранении: " + e.getMessage());
         }
     }
 }

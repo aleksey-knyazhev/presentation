@@ -27,9 +27,7 @@ public class PptxController {
             byte[] pptxBytes = generatorService.generatePresentation();
 
             HttpHeaders headers = new HttpHeaders();
-            // Указываем тип контента для PowerPoint (.pptx)
             headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.presentationml.presentation"));
-            // Имя файла при скачивании
             headers.setContentDispositionFormData("attachment", "generated_report.pptx");
             headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
