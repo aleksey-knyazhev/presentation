@@ -8,4 +8,5 @@ import lombok.Getter;
 public class Slide {
     private final byte[] imageBytes;
     private final String text;
+    private final String textColor;
 }

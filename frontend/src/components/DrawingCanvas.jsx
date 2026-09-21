@@ -7,6 +7,9 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
     const [lineWidth, setLineWidth] = useState(4);
     const [status, setStatus] = useState('');
 
+    // Состояние для хранения истории снимков холста (массив строк Base64)
+    const [history, setHistory] = useState([]);
+
     const [text, setText] = useState('');
     const [textX] = useState(50);
     const [textY] = useState(50);
@@ -36,7 +39,37 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
     };
 
     const stopDrawing = () => {
+        if (!isDrawing) return;
         setIsDrawing(false);
+
+        // Сохраняем снимок холста в историю после завершения линии
+        const canvas = canvasRef.current;
+        setHistory(prev => [...prev, canvas.toDataURL()]);
+    };
+
+    // Функция отмены последнего действия
+    const undo = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+
+        if (history.length === 0) return;
+
+        // Удаляем последний шаг из истории
+        const newHistory = history.slice(0, -1);
+        setHistory(newHistory);
+
+        // Полностью очищаем холст
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Если в истории еще остались шаги, восстанавливаем последний
+        if (newHistory.length > 0) {
+            const previousState = newHistory[newHistory.length - 1];
+            const img = new Image();
+            img.src = previousState;
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0);
+            };
+        }
     };
 
     const getCanvasPoint = (e) => {
@@ -56,6 +89,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
         const ctx = canvas.getContext('2d');
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        setHistory([]); // Очищаем историю при полной очистке
         setText('');
         setStatus('');
     };
@@ -65,6 +99,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
         return {
             image: canvas.toDataURL('image/png'),
             text,
+            textColor: strokeColor,
         };
     };
 
@@ -123,6 +158,17 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
                     />
                     <span>{lineWidth}px</span>
                 </label>
+
+                {/* Кнопка "Отменить" добавлена строго слева от кнопки "Очистить" */}
+                <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={undo}
+                    disabled={history.length === 0}
+                >
+                    Отменить
+                </button>
+
                 <button className="secondary-button" type="button" onClick={clearCanvas}>
                     Очистить
                 </button>

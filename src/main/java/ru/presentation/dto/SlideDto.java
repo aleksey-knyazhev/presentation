@@ -8,4 +8,5 @@ import lombok.Setter;
 public class SlideDto {
     private String image;
     private String text;
+    private String textColor;
 }

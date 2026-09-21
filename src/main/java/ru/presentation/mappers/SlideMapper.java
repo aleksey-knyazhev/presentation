@@ -13,6 +13,7 @@ public class SlideMapper {
         return Slide.builder()
                 .imageBytes(decodeImage(dto.getImage()))
                 .text(dto.getText())
+                .textColor(dto.getTextColor())
                 .build();
     }
 

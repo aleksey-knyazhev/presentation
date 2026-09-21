@@ -15,10 +15,10 @@ public class PptxGeneratorService {
 
     public byte[] generatePresentation(Slide sourceSlide) throws IOException {
         try (XMLSlideShow ppt = new XMLSlideShow();
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
             XSLFSlide pptSlide = ppt.createSlide();
-            addText(pptSlide, sourceSlide.getText());
+            addText(pptSlide, sourceSlide.getText(), sourceSlide.getTextColor());
             addImage(ppt, pptSlide, sourceSlide.getImageBytes());
 
             ppt.write(out);
@@ -26,7 +26,7 @@ public class PptxGeneratorService {
         }
     }
 
-    private void addText(XSLFSlide pptSlide, String text) {
+    private void addText(XSLFSlide pptSlide, String text, String textColor) {
         if (text == null || text.isBlank()) {
             return;
         }
@@ -38,8 +38,20 @@ public class PptxGeneratorService {
         XSLFTextRun textRun = paragraph.addNewTextRun();
         textRun.setText(text);
         textRun.setFontSize(28.0);
-        textRun.setFontColor(Color.BLUE);
+        textRun.setFontColor(parseColor(textColor));
         textRun.setBold(true);
+    }
+
+    private Color parseColor(String color) {
+        if (color == null || color.isBlank()) {
+            return Color.BLACK;
+        }
+
+        try {
+            return Color.decode(color);
+        } catch (NumberFormatException e) {
+            return Color.BLACK;
+        }
     }
 
     private void addImage(XMLSlideShow ppt, XSLFSlide pptSlide, byte[] imageBytes) {
