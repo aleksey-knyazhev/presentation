@@ -11,7 +11,6 @@ public class TemplateMapper {
         return Template.builder()
                 .id(dto.getId())
                 .title(resolveTitle(dto))
-                .description(dto.getDescription())
                 .fileName(dto.getFileName())
                 .slideCount(dto.getSlideCount())
                 .build();
@@ -21,7 +20,6 @@ public class TemplateMapper {
         TemplateDto dto = new TemplateDto();
         dto.setId(template.getId());
         dto.setTitle(template.getTitle());
-        dto.setDescription(template.getDescription());
         dto.setFileName(template.getFileName());
         dto.setSlideCount(template.getSlideCount());
         return dto;

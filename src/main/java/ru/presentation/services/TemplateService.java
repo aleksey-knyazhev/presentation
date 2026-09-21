@@ -52,7 +52,6 @@ public class TemplateService {
                 .orElseThrow(() -> new IllegalArgumentException("Шаблон не найден: " + id));
 
         template.setTitle(resolveTitle(updatedTemplate.getTitle()));
-        template.setDescription(updatedTemplate.getDescription());
         return templateRepository.save(template);
     }
 

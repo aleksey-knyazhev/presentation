@@ -24,4 +24,8 @@
     <changeSet id="005-add-template-slide-count" author="aleksey">
         <sqlFile path="sql/20260922002000-add-template-slide-count.sql" relativeToChangelogFile="true"/>
     </changeSet>
+
+    <changeSet id="006-drop-template-description" author="aleksey">
+        <sqlFile path="sql/20260922003000-drop-template-description.sql" relativeToChangelogFile="true"/>
+    </changeSet>
 </databaseChangeLog>
