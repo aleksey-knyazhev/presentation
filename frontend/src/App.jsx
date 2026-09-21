@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  createPresentationPreview,
   createTemplatePreview,
   getTemplatePreviewInfo,
 } from './api.js';
@@ -55,32 +54,6 @@ export default function App() {
 
   const downloadPresentation = () => {
     drawingCanvasRef.current?.downloadPresentation();
-  };
-
-  const showPreview = async () => {
-    const slides = drawingCanvasRef.current?.getSlides();
-    const currentSlide = slides?.[slideState.activeSlideIndex];
-
-    if (!currentSlide) {
-      return;
-    }
-
-    setIsPreviewLoading(true);
-    try {
-      const response = await createPresentationPreview(currentSlide);
-
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      replacePreviewUrl(URL.createObjectURL(blob));
-      setPreviewTemplate(null);
-    } catch (error) {
-      console.error('Ошибка создания превью', error);
-    } finally {
-      setIsPreviewLoading(false);
-    }
   };
 
   const addSlide = () => {
@@ -218,7 +191,6 @@ export default function App() {
         <section className="workspace">
           <PresentationEditorHeader
             presentationTitle={activePresentation.title}
-            isPreviewLoading={isPreviewLoading}
             slideState={slideState}
             onAddSlide={addSlide}
             onCloseEditor={closePresentationEditor}
@@ -226,7 +198,6 @@ export default function App() {
             onDownloadPresentation={downloadPresentation}
             onNextSlide={nextSlide}
             onPreviousSlide={previousSlide}
-            onShowPreview={showPreview}
             onRenamePresentation={renameActivePresentation}
           />
 
@@ -236,11 +207,6 @@ export default function App() {
               initialSlides={activePresentation.slides}
               onSlideStateChange={setSlideState}
           />
-          {previewUrl && (
-            <section className="preview-panel" aria-label="Превью слайда">
-              <img src={previewUrl} alt="Превью слайда" />
-            </section>
-          )}
         </section>
       </main>
   );

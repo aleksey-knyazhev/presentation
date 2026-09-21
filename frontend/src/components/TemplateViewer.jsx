@@ -15,8 +15,9 @@ export default function TemplateViewer({
       <section className="workspace">
         <header className="workspace-header">
           <div>
-            <h1>{template.title}</h1>
+            <h1>Шаблон</h1>
             <div className="slide-nav template-viewer-nav" aria-label="Навигация по слайдам шаблона">
+              <span className="template-title">{template.title}</span>
               <button
                 className="secondary-button"
                 type="button"
