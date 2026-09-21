@@ -42,10 +42,7 @@ export default function PresentationList({
 
           {presentations.length === 0 && (
             <div className="empty-state">
-              <p>Презентаций пока нет.</p>
-              <button className="primary-button" type="button" onClick={onAddPresentation}>
-                Добавить презентацию
-              </button>
+              <p>Презентаций пока нет</p>
             </div>
           )}
         </section>
