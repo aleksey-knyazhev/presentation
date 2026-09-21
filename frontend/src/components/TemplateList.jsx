@@ -3,8 +3,12 @@ import SectionNav from './SectionNav.jsx';
 export default function TemplateList({
   onAddTemplate,
   onDeleteTemplate,
+  onOpenTemplate,
   onOpenPresentations,
   onOpenTemplates,
+  previewTemplate,
+  previewUrl,
+  isPreviewLoading,
   templates,
 }) {
   const uploadTemplate = (event) => {
@@ -40,7 +44,12 @@ export default function TemplateList({
                 <p>{template.slideCount ?? 0} стр.</p>
               </div>
               <div className="presentation-actions">
-                <button className="secondary-button" type="button">
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => onOpenTemplate(template)}
+                  disabled={isPreviewLoading}
+                >
                   Открыть
                 </button>
                 <button
@@ -60,6 +69,16 @@ export default function TemplateList({
             </div>
           )}
         </section>
+
+        {previewUrl && (
+          <section className="preview-panel" aria-label="Превью шаблона">
+            <div className="preview-header">
+              <h2>{previewTemplate?.title || 'Превью шаблона'}</h2>
+              <span>{isPreviewLoading ? 'Загрузка...' : 'Слайд 1'}</span>
+            </div>
+            <img src={previewUrl} alt="Превью шаблона" />
+          </section>
+        )}
       </section>
     </main>
   );

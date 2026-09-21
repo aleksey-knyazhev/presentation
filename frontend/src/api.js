@@ -56,3 +56,17 @@ export const deleteTemplate = async (templateId) => {
     method: 'DELETE',
   });
 };
+
+export const createPresentationPreview = (slide) =>
+  fetch('/api/presentation/preview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(slide),
+  });
+
+export const createTemplatePreview = (templateId) =>
+  fetch('/api/presentation/preview', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ templateId }),
+  });

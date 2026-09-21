@@ -1,4 +1,5 @@
 export default function PresentationEditorHeader({
+  isPreviewLoading,
   presentationTitle,
   slideState,
   onAddSlide,
@@ -8,6 +9,7 @@ export default function PresentationEditorHeader({
   onNextSlide,
   onPreviousSlide,
   onRenamePresentation,
+  onShowPreview,
 }) {
   return (
     <header className="workspace-header">
@@ -57,6 +59,14 @@ export default function PresentationEditorHeader({
       <div className="header-actions">
         <button className="secondary-button" type="button" onClick={onCloseEditor}>
           К списку
+        </button>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={onShowPreview}
+          disabled={isPreviewLoading}
+        >
+          {isPreviewLoading ? 'Готовим...' : 'Превью'}
         </button>
         <button className="primary-button" type="button" onClick={onDownloadPresentation}>
           Скачать PPTX

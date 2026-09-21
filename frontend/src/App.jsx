@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPresentationPreview, createTemplatePreview } from './api.js';
 import DrawingCanvas from './components/DrawingCanvas.jsx';
 import PresentationEditorHeader from './components/PresentationEditorHeader.jsx';
 import PresentationList from './components/PresentationList.jsx';
@@ -8,7 +9,11 @@ import useTemplates from './hooks/useTemplates.js';
 
 export default function App() {
   const drawingCanvasRef = useRef(null);
+  const previewUrlRef = useRef(null);
   const [activeSection, setActiveSection] = useState('presentations');
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState(null);
   const {
     activePresentation,
     addPresentation,
@@ -26,8 +31,49 @@ export default function App() {
     templates,
   } = useTemplates();
 
+  useEffect(() => () => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
+  }, []);
+
+  const replacePreviewUrl = (url) => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+    }
+
+    previewUrlRef.current = url;
+    setPreviewUrl(url);
+  };
+
   const downloadPresentation = () => {
     drawingCanvasRef.current?.downloadPresentation();
+  };
+
+  const showPreview = async () => {
+    const slides = drawingCanvasRef.current?.getSlides();
+    const currentSlide = slides?.[slideState.activeSlideIndex];
+
+    if (!currentSlide) {
+      return;
+    }
+
+    setIsPreviewLoading(true);
+    try {
+      const response = await createPresentationPreview(currentSlide);
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      replacePreviewUrl(URL.createObjectURL(blob));
+      setPreviewTemplate(null);
+    } catch (error) {
+      console.error('Ошибка создания превью', error);
+    } finally {
+      setIsPreviewLoading(false);
+    }
   };
 
   const addSlide = () => {
@@ -46,6 +92,37 @@ export default function App() {
     drawingCanvasRef.current?.nextSlide();
   };
 
+  const closePresentationEditor = async () => {
+    setPreviewTemplate(null);
+    replacePreviewUrl(null);
+    await closeEditor();
+  };
+
+  const openPresentationEditor = async (presentationId) => {
+    setPreviewTemplate(null);
+    replacePreviewUrl(null);
+    await openPresentation(presentationId);
+  };
+
+  const openTemplate = async (template) => {
+    setIsPreviewLoading(true);
+    try {
+      const response = await createTemplatePreview(template.id);
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      replacePreviewUrl(URL.createObjectURL(blob));
+      setPreviewTemplate(template);
+    } catch (error) {
+      console.error('Ошибка открытия шаблона', error);
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
   if (!activePresentation) {
     if (activeSection === 'templates') {
       return (
@@ -53,8 +130,12 @@ export default function App() {
           templates={templates}
           onAddTemplate={addTemplate}
           onDeleteTemplate={deleteTemplate}
-          onOpenPresentations={() => setActiveSection('presentations')}
+          onOpenTemplate={openTemplate}
+            onOpenPresentations={() => setActiveSection('presentations')}
           onOpenTemplates={() => setActiveSection('templates')}
+          previewTemplate={previewTemplate}
+          previewUrl={previewUrl}
+          isPreviewLoading={isPreviewLoading}
         />
       );
     }
@@ -65,7 +146,7 @@ export default function App() {
         onAddPresentation={addPresentation}
         onDeletePresentation={deletePresentation}
         onOpenPresentations={() => setActiveSection('presentations')}
-        onOpenPresentation={openPresentation}
+        onOpenPresentation={openPresentationEditor}
         onOpenTemplates={() => setActiveSection('templates')}
       />
     );
@@ -76,13 +157,15 @@ export default function App() {
         <section className="workspace">
           <PresentationEditorHeader
             presentationTitle={activePresentation.title}
+            isPreviewLoading={isPreviewLoading}
             slideState={slideState}
             onAddSlide={addSlide}
-            onCloseEditor={closeEditor}
+            onCloseEditor={closePresentationEditor}
             onDeleteSlide={deleteSlide}
             onDownloadPresentation={downloadPresentation}
             onNextSlide={nextSlide}
             onPreviousSlide={previousSlide}
+            onShowPreview={showPreview}
             onRenamePresentation={renameActivePresentation}
           />
 
@@ -92,6 +175,11 @@ export default function App() {
               initialSlides={activePresentation.slides}
               onSlideStateChange={setSlideState}
           />
+          {previewUrl && (
+            <section className="preview-panel" aria-label="Превью слайда">
+              <img src={previewUrl} alt="Превью слайда" />
+            </section>
+          )}
         </section>
       </main>
   );

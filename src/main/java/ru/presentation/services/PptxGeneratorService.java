@@ -5,15 +5,29 @@ import org.apache.poi.xslf.usermodel.*;
 import org.springframework.stereotype.Service;
 import ru.presentation.domain.Presentation;
 import ru.presentation.domain.Slide;
+import ru.presentation.domain.Template;
+import ru.presentation.repositories.TemplateRepository;
 
+import javax.imageio.ImageIO;
+import java.awt.Dimension;
 import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 @Service
 public class PptxGeneratorService {
+
+    private final TemplateRepository templateRepository;
+
+    public PptxGeneratorService(TemplateRepository templateRepository) {
+        this.templateRepository = templateRepository;
+    }
 
     public byte[] generatePresentation(Presentation presentation) throws IOException {
         try (XMLSlideShow ppt = new XMLSlideShow();
@@ -33,6 +47,93 @@ public class PptxGeneratorService {
             ppt.write(out);
             return out.toByteArray();
         }
+    }
+
+    public byte[] generateImagePreviewFromTemplate(Long templateId, String userText, byte[] userImageBytes) throws Exception {
+        Template template = templateRepository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("Шаблон не найден: " + templateId));
+
+        byte[] templateBytes = template.getFileBytes();
+        if (templateBytes == null || templateBytes.length == 0) {
+            throw new IllegalArgumentException("Файл шаблона пустой: " + templateId);
+        }
+
+        try (XMLSlideShow ppt = new XMLSlideShow(new ByteArrayInputStream(templateBytes));
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            XSLFSlide slide = getOrCreateFirstSlide(ppt);
+            addPreviewText(slide, userText);
+            addImage(ppt, slide, userImageBytes);
+
+            Dimension pageSize = ppt.getPageSize();
+            float scale = 2.0f;
+            BufferedImage image = new BufferedImage(
+                    Math.round(pageSize.width * scale),
+                    Math.round(pageSize.height * scale),
+                    BufferedImage.TYPE_INT_ARGB
+            );
+            Graphics2D graphics = image.createGraphics();
+            try {
+                graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                graphics.scale(scale, scale);
+                slide.draw(graphics);
+            } finally {
+                graphics.dispose();
+            }
+
+            ImageIO.write(image, "png", out);
+            return out.toByteArray();
+        }
+    }
+
+    private XSLFSlide getOrCreateFirstSlide(XMLSlideShow ppt) {
+        if (!ppt.getSlides().isEmpty()) {
+            return ppt.getSlides().get(0);
+        }
+
+        for (XSLFSlideMaster slideMaster : ppt.getSlideMasters()) {
+            XSLFSlideLayout[] layouts = slideMaster.getSlideLayouts();
+            if (layouts.length > 0) {
+                return ppt.createSlide(layouts[0]);
+            }
+        }
+
+        return ppt.createSlide();
+    }
+
+    private void addPreviewText(XSLFSlide slide, String text) {
+        if (text == null || text.isBlank()) {
+            return;
+        }
+
+        XSLFTextBox textBox = findTextBox(slide);
+        if (textBox == null) {
+            textBox = slide.createTextBox();
+            textBox.setAnchor(new Rectangle(50, 35, 620, 90));
+        }
+
+        textBox.clearText();
+        String[] lines = text.split("\\R", -1);
+        for (String line : lines) {
+            XSLFTextParagraph paragraph = textBox.addNewTextParagraph();
+            XSLFTextRun textRun = paragraph.addNewTextRun();
+            textRun.setText(line);
+            textRun.setFontSize(28.0);
+            textRun.setFontColor(Color.BLACK);
+            textRun.setBold(true);
+        }
+    }
+
+    private XSLFTextBox findTextBox(XSLFSlide slide) {
+        for (XSLFShape shape : slide.getShapes()) {
+            if (shape instanceof XSLFTextBox textBox) {
+                return textBox;
+            }
+        }
+
+        return null;
     }
 
     private void addText(XSLFSlide pptSlide, String text, String textColor) {

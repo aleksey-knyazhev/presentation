@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.presentation.domain.Presentation;
 import ru.presentation.dto.PresentationDto;
+import ru.presentation.dto.PreviewRequestDto;
 import ru.presentation.mappers.SlideMapper;
 import ru.presentation.services.PptxGeneratorService;
 
 import java.io.IOException;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/presentation")
@@ -38,6 +40,29 @@ public class PptxController {
         return buildPresentationResponse(slideMapper.toPresentation(dto));
     }
 
+    @PostMapping("/preview")
+    public ResponseEntity<byte[]> previewPresentation(@RequestBody PreviewRequestDto dto) {
+        try {
+            byte[] imageBytes = decodeImage(dto == null ? null : dto.getImage());
+            Long templateId = dto == null || dto.getTemplateId() == null ? 1L : dto.getTemplateId();
+            byte[] previewBytes = generatorService.generateImagePreviewFromTemplate(
+                    templateId,
+                    dto == null ? null : dto.getText(),
+                    imageBytes
+            );
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_PNG);
+            headers.setCacheControl("no-store");
+
+            return new ResponseEntity<>(previewBytes, headers, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private ResponseEntity<byte[]> buildPresentationResponse(Presentation presentation) {
         try {
             byte[] pptxBytes = generatorService.generatePresentation(presentation);
@@ -51,5 +76,15 @@ public class PptxController {
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private byte[] decodeImage(String image) {
+        if (image == null || image.isBlank()) {
+            return new byte[0];
+        }
+
+        int contentStartIndex = image.indexOf(',');
+        String base64Image = contentStartIndex >= 0 ? image.substring(contentStartIndex + 1) : image;
+        return Base64.getDecoder().decode(base64Image);
     }
 }
