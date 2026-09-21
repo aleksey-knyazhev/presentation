@@ -45,8 +45,10 @@ public class PptxController {
         try {
             byte[] imageBytes = decodeImage(dto == null ? null : dto.getImage());
             Long templateId = dto == null || dto.getTemplateId() == null ? 1L : dto.getTemplateId();
+            int slideIndex = dto == null || dto.getSlideIndex() == null ? 0 : dto.getSlideIndex();
             byte[] previewBytes = generatorService.generateImagePreviewFromTemplate(
                     templateId,
+                    slideIndex,
                     dto == null ? null : dto.getText(),
                     imageBytes
             );

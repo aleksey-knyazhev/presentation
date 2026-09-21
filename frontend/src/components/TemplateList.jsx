@@ -6,8 +6,6 @@ export default function TemplateList({
   onOpenTemplate,
   onOpenPresentations,
   onOpenTemplates,
-  previewTemplate,
-  previewUrl,
   isPreviewLoading,
   templates,
 }) {
@@ -69,16 +67,6 @@ export default function TemplateList({
             </div>
           )}
         </section>
-
-        {previewUrl && (
-          <section className="preview-panel" aria-label="Превью шаблона">
-            <div className="preview-header">
-              <h2>{previewTemplate?.title || 'Превью шаблона'}</h2>
-              <span>{isPreviewLoading ? 'Загрузка...' : 'Слайд 1'}</span>
-            </div>
-            <img src={previewUrl} alt="Превью шаблона" />
-          </section>
-        )}
       </section>
     </main>
   );

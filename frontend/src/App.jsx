@@ -4,6 +4,7 @@ import DrawingCanvas from './components/DrawingCanvas.jsx';
 import PresentationEditorHeader from './components/PresentationEditorHeader.jsx';
 import PresentationList from './components/PresentationList.jsx';
 import TemplateList from './components/TemplateList.jsx';
+import TemplateViewer from './components/TemplateViewer.jsx';
 import usePresentations from './hooks/usePresentations.js';
 import useTemplates from './hooks/useTemplates.js';
 
@@ -14,6 +15,7 @@ export default function App() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState(null);
+  const [templateSlideIndex, setTemplateSlideIndex] = useState(0);
   const {
     activePresentation,
     addPresentation,
@@ -94,20 +96,22 @@ export default function App() {
 
   const closePresentationEditor = async () => {
     setPreviewTemplate(null);
+    setTemplateSlideIndex(0);
     replacePreviewUrl(null);
     await closeEditor();
   };
 
   const openPresentationEditor = async (presentationId) => {
     setPreviewTemplate(null);
+    setTemplateSlideIndex(0);
     replacePreviewUrl(null);
     await openPresentation(presentationId);
   };
 
-  const openTemplate = async (template) => {
+  const loadTemplatePreview = async (template, slideIndex) => {
     setIsPreviewLoading(true);
     try {
-      const response = await createTemplatePreview(template.id);
+      const response = await createTemplatePreview(template.id, slideIndex);
 
       if (!response.ok) {
         throw new Error(`Request failed: ${response.status}`);
@@ -116,6 +120,7 @@ export default function App() {
       const blob = await response.blob();
       replacePreviewUrl(URL.createObjectURL(blob));
       setPreviewTemplate(template);
+      setTemplateSlideIndex(slideIndex);
     } catch (error) {
       console.error('Ошибка открытия шаблона', error);
     } finally {
@@ -123,7 +128,47 @@ export default function App() {
     }
   };
 
+  const openTemplate = (template) => {
+    loadTemplatePreview(template, 0);
+  };
+
+  const closeTemplateViewer = () => {
+    setPreviewTemplate(null);
+    setTemplateSlideIndex(0);
+    replacePreviewUrl(null);
+  };
+
+  const previousTemplateSlide = () => {
+    if (!previewTemplate || templateSlideIndex === 0) {
+      return;
+    }
+
+    loadTemplatePreview(previewTemplate, templateSlideIndex - 1);
+  };
+
+  const nextTemplateSlide = () => {
+    if (!previewTemplate || templateSlideIndex >= (previewTemplate.slideCount ?? 1) - 1) {
+      return;
+    }
+
+    loadTemplatePreview(previewTemplate, templateSlideIndex + 1);
+  };
+
   if (!activePresentation) {
+    if (previewTemplate) {
+      return (
+        <TemplateViewer
+          template={previewTemplate}
+          previewUrl={previewUrl}
+          slideIndex={templateSlideIndex}
+          isPreviewLoading={isPreviewLoading}
+          onClose={closeTemplateViewer}
+          onPreviousSlide={previousTemplateSlide}
+          onNextSlide={nextTemplateSlide}
+        />
+      );
+    }
+
     if (activeSection === 'templates') {
       return (
         <TemplateList
@@ -131,10 +176,8 @@ export default function App() {
           onAddTemplate={addTemplate}
           onDeleteTemplate={deleteTemplate}
           onOpenTemplate={openTemplate}
-            onOpenPresentations={() => setActiveSection('presentations')}
+          onOpenPresentations={() => setActiveSection('presentations')}
           onOpenTemplates={() => setActiveSection('templates')}
-          previewTemplate={previewTemplate}
-          previewUrl={previewUrl}
           isPreviewLoading={isPreviewLoading}
         />
       );

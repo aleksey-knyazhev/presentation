@@ -50,6 +50,10 @@ public class PptxGeneratorService {
     }
 
     public byte[] generateImagePreviewFromTemplate(Long templateId, String userText, byte[] userImageBytes) throws Exception {
+        return generateImagePreviewFromTemplate(templateId, 0, userText, userImageBytes);
+    }
+
+    public byte[] generateImagePreviewFromTemplate(Long templateId, int slideIndex, String userText, byte[] userImageBytes) throws Exception {
         Template template = templateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("Шаблон не найден: " + templateId));
 
@@ -60,7 +64,7 @@ public class PptxGeneratorService {
 
         try (XMLSlideShow ppt = new XMLSlideShow(new ByteArrayInputStream(templateBytes));
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            XSLFSlide slide = getOrCreateFirstSlide(ppt);
+            XSLFSlide slide = getOrCreateSlide(ppt, slideIndex);
             addPreviewText(slide, userText);
             addImage(ppt, slide, userImageBytes);
 
@@ -88,9 +92,14 @@ public class PptxGeneratorService {
         }
     }
 
-    private XSLFSlide getOrCreateFirstSlide(XMLSlideShow ppt) {
-        if (!ppt.getSlides().isEmpty()) {
-            return ppt.getSlides().get(0);
+    private XSLFSlide getOrCreateSlide(XMLSlideShow ppt, int slideIndex) {
+        List<XSLFSlide> slides = ppt.getSlides();
+        if (!slides.isEmpty()) {
+            if (slideIndex < 0 || slideIndex >= slides.size()) {
+                throw new IllegalArgumentException("Слайд шаблона не найден: " + slideIndex);
+            }
+
+            return slides.get(slideIndex);
         }
 
         for (XSLFSlideMaster slideMaster : ppt.getSlideMasters()) {
