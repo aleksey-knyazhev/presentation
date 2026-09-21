@@ -73,6 +73,24 @@ h1 {
   align-items: center;
   flex-wrap: wrap;
   gap: 14px;
+  margin-top: 10px;
+}
+
+.presentation-title-input {
+  width: 260px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #c7d0dd;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.presentation-title-input:focus {
+  border-color: #2563eb;
+  outline: 2px solid rgba(37, 99, 235, 0.16);
 }
 
 .slide-controls {
@@ -221,7 +239,7 @@ h1 {
 .drawing-canvas {
   display: block;
   width: 100%;
-  aspect-ratio: 900 / 347;
+  aspect-ratio: 900 / 267;
   border: 1px solid #b9c4d4;
   border-radius: 6px;
   background: #ffffff;

@@ -52,6 +52,14 @@ export default function App() {
     setSlideState({ activeSlideIndex: 0, slideCount: 1 });
   };
 
+  const renameActivePresentation = (title) => {
+    setPresentations(presentations.map((presentation) =>
+        presentation.id === activePresentationId
+            ? { ...presentation, title }
+            : presentation
+    ));
+  };
+
   const downloadPresentation = () => {
     drawingCanvasRef.current?.downloadPresentation();
   };
@@ -92,7 +100,7 @@ export default function App() {
                     </div>
                     <div className="presentation-actions">
                       <button
-                          className="primary-button"
+                          className="secondary-button"
                           type="button"
                           onClick={() => openPresentation(presentation.id)}
                       >
@@ -128,8 +136,14 @@ export default function App() {
         <section className="workspace">
           <header className="workspace-header">
             <div>
+              <h1>Редактор презентации</h1>
               <div className="title-row">
-                <h1>Редактор презентаций</h1>
+                <input
+                    className="presentation-title-input"
+                    aria-label="Название презентации"
+                    value={activePresentation.title}
+                    onChange={(event) => renameActivePresentation(event.target.value)}
+                />
                 <div className="slide-controls">
                   <button
                       className="secondary-button"

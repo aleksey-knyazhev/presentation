@@ -303,7 +303,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas({ initialSlides, onSlide
             <canvas
                 ref={canvasRef}
                 width={900}
-                height={347}
+                height={267}
                 className="drawing-canvas"
                 onPointerDown={startDrawing}
                 onPointerMove={draw}
