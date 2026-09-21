@@ -68,27 +68,6 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
         };
     };
 
-    const saveDrawing = async () => {
-        try {
-            setStatus('Сохраняем...');
-            const response = await fetch('/api/drawings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(getSlidePayload()),
-            });
-            const message = await response.text();
-
-            if (!response.ok) {
-                throw new Error(message || 'Не удалось сохранить рисунок');
-            }
-
-            setStatus(message || 'Рисунок сохранен');
-        } catch (err) {
-            console.error('Ошибка сохранения', err);
-            setStatus('Ошибка сохранения рисунка');
-        }
-    };
-
     const downloadPresentation = async () => {
         try {
             setStatus('Готовим PPTX...');
@@ -146,9 +125,6 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
                 </label>
                 <button className="secondary-button" type="button" onClick={clearCanvas}>
                     Очистить
-                </button>
-                <button className="primary-button" type="button" onClick={saveDrawing}>
-                    Сохранить рисунок
                 </button>
             </div>
 
