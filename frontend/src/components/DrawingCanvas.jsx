@@ -7,8 +7,9 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
     const [lineWidth, setLineWidth] = useState(4);
     const [status, setStatus] = useState('');
 
-    // Состояние для хранения истории снимков холста (массив строк Base64)
-    const [history, setHistory] = useState([]);
+    // Состояния для хранения истории шагов
+    const [history, setHistory] = useState([]);   // Стек для Отмены (Undo)
+    const [redoStack, setRedoStack] = useState([]); // Стек для Возврата (Redo)
 
     const [text, setText] = useState('');
     const [textX] = useState(50);
@@ -42,26 +43,32 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
         if (!isDrawing) return;
         setIsDrawing(false);
 
-        // Сохраняем снимок холста в историю после завершения линии
         const canvas = canvasRef.current;
+        // Сохраняем текущий снимок в историю отмены
         setHistory(prev => [...prev, canvas.toDataURL()]);
+        // При создании новой линии ветка истории меняется, очищаем стек возврата
+        setRedoStack([]);
     };
 
-    // Функция отмены последнего действия
+    // Функция ОТМЕНИТЬ (Undo)
     const undo = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
 
         if (history.length === 0) return;
 
-        // Удаляем последний шаг из истории
+        // Забираем последний снимок из истории отмены
+        const currentImg = history[history.length - 1];
         const newHistory = history.slice(0, -1);
         setHistory(newHistory);
+
+        // Перекладываем его в стек возврата
+        setRedoStack(prev => [...prev, currentImg]);
 
         // Полностью очищаем холст
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Если в истории еще остались шаги, восстанавливаем последний
+        // Восстанавливаем снимок, который теперь стал последним в истории
         if (newHistory.length > 0) {
             const previousState = newHistory[newHistory.length - 1];
             const img = new Image();
@@ -70,6 +77,29 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
                 ctx.drawImage(img, 0, 0);
             };
         }
+    };
+
+    // Функция ВЕРНУТЬ (Redo)
+    const redo = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+
+        if (redoStack.length === 0) return;
+
+        // Забираем последний снимок из стека возврата
+        const nextImg = redoStack[redoStack.length - 1];
+        setRedoStack(prev => prev.slice(0, -1));
+
+        // Возвращаем его обратно в историю отмены
+        setHistory(prev => [...prev, nextImg]);
+
+        // Рисуем этот снимок на холсте
+        const img = new Image();
+        img.src = nextImg;
+        img.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+        };
     };
 
     const getCanvasPoint = (e) => {
@@ -89,7 +119,8 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
         const ctx = canvas.getContext('2d');
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        setHistory([]); // Очищаем историю при полной очистке
+        setHistory([]);
+        setRedoStack([]); // Очищаем стек возврата при полной очистке холста
         setText('');
         setStatus('');
     };
@@ -99,7 +130,6 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
         return {
             image: canvas.toDataURL('image/png'),
             text,
-            textColor: strokeColor,
         };
     };
 
@@ -159,7 +189,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
                     <span>{lineWidth}px</span>
                 </label>
 
-                {/* Кнопка "Отменить" добавлена строго слева от кнопки "Очистить" */}
+                {/* Отменить */}
                 <button
                     className="secondary-button"
                     type="button"
@@ -169,6 +199,17 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
                     Отменить
                 </button>
 
+                {/* Вернуть (Добавлена между Отменить и Очистить) */}
+                <button
+                    className="secondary-button"
+                    type="button"
+                    onClick={redo}
+                    disabled={redoStack.length === 0}
+                >
+                    Вернуть
+                </button>
+
+                {/* Очистить */}
                 <button className="secondary-button" type="button" onClick={clearCanvas}>
                     Очистить
                 </button>
