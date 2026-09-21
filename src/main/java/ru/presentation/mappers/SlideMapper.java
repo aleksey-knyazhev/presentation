@@ -23,7 +23,7 @@ public class SlideMapper {
 
     public List<Slide> toSlides(List<SlideDto> dtos) {
         if (dtos == null || dtos.isEmpty()) {
-            return List.of(Slide.builder().build());
+            return List.of();
         }
 
         return dtos.stream()
