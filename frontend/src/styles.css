@@ -103,7 +103,8 @@ h1 {
 }
 
 .presentation-title-input {
-  width: 260px;
+  width: 420px;
+  max-width: 560px;
   min-height: 40px;
   padding: 0 12px;
   border: 1px solid #c7d0dd;
@@ -120,6 +121,8 @@ h1 {
 }
 
 .template-title {
+  min-width: 420px;
+  max-width: 560px;
   min-height: 40px;
   display: inline-flex;
   align-items: center;
@@ -130,6 +133,7 @@ h1 {
   color: #172033;
   font-size: 16px;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .template-viewer-nav {

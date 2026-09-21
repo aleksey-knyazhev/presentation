@@ -16,8 +16,12 @@ export default function TemplateViewer({
         <header className="workspace-header">
           <div>
             <h1>Шаблон</h1>
-            <div className="slide-nav template-viewer-nav" aria-label="Навигация по слайдам шаблона">
+            <div className="template-viewer-nav">
               <span className="template-title">{template.title}</span>
+            </div>
+          </div>
+          <div className="header-actions">
+            <div className="slide-nav" aria-label="Навигация по слайдам шаблона">
               <button
                 className="secondary-button"
                 type="button"
@@ -36,8 +40,6 @@ export default function TemplateViewer({
                 Вперед
               </button>
             </div>
-          </div>
-          <div className="header-actions">
             <button className="secondary-button" type="button" onClick={onClose}>
               К списку
             </button>
