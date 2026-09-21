@@ -3,32 +3,36 @@ package ru.presentation.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.presentation.dto.DrawingDto;
+import ru.presentation.domain.Slide;
+import ru.presentation.dto.SlideDto;
+import ru.presentation.mappers.SlideMapper;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/drawings")
 public class DrawingController {
 
+    private final SlideMapper slideMapper;
+
+    public DrawingController(SlideMapper slideMapper) {
+        this.slideMapper = slideMapper;
+    }
+
     @PostMapping
-    public ResponseEntity<String> saveDrawing(@RequestBody DrawingDto dto) {
+    public ResponseEntity<String> saveDrawing(@RequestBody SlideDto dto) {
         try {
-            String rawImage = dto.getImage();
-            String base64Image = rawImage.contains(",") ? rawImage.split(",")[1] : rawImage;
+            Slide slide = slideMapper.toSlide(dto);
+            Path uploadsDirectory = Path.of("uploads");
+            Files.createDirectories(uploadsDirectory);
 
-            byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Image);
+            String fileName = "drawing_" + UUID.randomUUID() + ".png";
+            Files.write(uploadsDirectory.resolve(fileName), slide.getImageBytes());
 
-            // Создаем папку, если её нет
-            java.io.File outputFile = new java.io.File("./uploads/");
-            if (!outputFile.exists()) {
-                outputFile.mkdirs();
-            }
-
-            // Имя файла (сервис генерации PPTX будет искать именно файлы с префиксом drawing_ и расширением .png)
-            String fileName = "drawing_" + java.util.UUID.randomUUID() + ".png";
-            java.nio.file.Files.write(new java.io.File(outputFile, fileName).toPath(), imageBytes);
-
-            log.info("Полученный текст: {}", dto.getText());
+            log.info("Полученный текст: {}", slide.getText());
 
             return ResponseEntity.ok("Файл " + fileName + " успешно сохранен на сервере!");
         } catch (Exception e) {

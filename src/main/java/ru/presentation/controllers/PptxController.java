@@ -5,8 +5,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.presentation.domain.Slide;
+import ru.presentation.dto.SlideDto;
+import ru.presentation.mappers.SlideMapper;
 import ru.presentation.services.PptxGeneratorService;
 
 import java.io.IOException;
@@ -16,15 +21,26 @@ import java.io.IOException;
 public class PptxController {
 
     private final PptxGeneratorService generatorService;
+    private final SlideMapper slideMapper;
 
-    public PptxController(PptxGeneratorService generatorService) {
+    public PptxController(PptxGeneratorService generatorService, SlideMapper slideMapper) {
         this.generatorService = generatorService;
+        this.slideMapper = slideMapper;
     }
 
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadPresentation() {
+        return buildPresentationResponse(Slide.builder().build());
+    }
+
+    @PostMapping("/download")
+    public ResponseEntity<byte[]> downloadPresentation(@RequestBody SlideDto dto) {
+        return buildPresentationResponse(slideMapper.toSlide(dto));
+    }
+
+    private ResponseEntity<byte[]> buildPresentationResponse(Slide slide) {
         try {
-            byte[] pptxBytes = generatorService.generatePresentation();
+            byte[] pptxBytes = generatorService.generatePresentation(slide);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.presentationml.presentation"));

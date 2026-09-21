@@ -1,8 +1,11 @@
+import { useRef } from 'react';
 import DrawingCanvas from './components/DrawingCanvas.jsx';
 
 export default function App() {
+  const drawingCanvasRef = useRef(null);
+
   const downloadPresentation = () => {
-    window.location.href = '/api/presentation/download';
+    drawingCanvasRef.current?.downloadPresentation();
   };
 
   return (
@@ -18,7 +21,7 @@ export default function App() {
             </button>
           </header>
 
-          <DrawingCanvas />
+          <DrawingCanvas ref={drawingCanvasRef} />
         </section>
       </main>
   );

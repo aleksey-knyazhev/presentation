@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 
-export default function DrawingCanvas() {
+const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
     const canvasRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [strokeColor, setStrokeColor] = useState('#1f2937');
@@ -60,33 +60,21 @@ export default function DrawingCanvas() {
         setStatus('');
     };
 
-    const saveDrawing = async () => {
+    const getSlidePayload = () => {
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
+        return {
+            image: canvas.toDataURL('image/png'),
+            text,
+        };
+    };
 
-        if (text.trim() !== '') {
-            ctx.font = '24px Arial';
-            ctx.fillStyle = strokeColor;
-
-            const lines = text.split('\n');
-            const lineHeight = 30;
-
-            lines.forEach((line, index) => {
-                ctx.fillText(line, textX, textY + (index * lineHeight));
-            });
-        }
-
-        const dataURL = canvas.toDataURL('image/png');
-
+    const saveDrawing = async () => {
         try {
             setStatus('Сохраняем...');
             const response = await fetch('/api/drawings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    image: dataURL,
-                    text: text
-                }),
+                body: JSON.stringify(getSlidePayload()),
             });
             const message = await response.text();
 
@@ -100,6 +88,39 @@ export default function DrawingCanvas() {
             setStatus('Ошибка сохранения рисунка');
         }
     };
+
+    const downloadPresentation = async () => {
+        try {
+            setStatus('Готовим PPTX...');
+            const response = await fetch('/api/presentation/download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(getSlidePayload()),
+            });
+
+            if (!response.ok) {
+                throw new Error('Не удалось скачать PPTX');
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'generated_report.pptx';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            setStatus('PPTX скачан');
+        } catch (err) {
+            console.error('Ошибка скачивания PPTX', err);
+            setStatus('Ошибка скачивания PPTX');
+        }
+    };
+
+    useImperativeHandle(ref, () => ({
+        downloadPresentation,
+    }));
 
     return (
         <div className="drawing-panel">
@@ -144,7 +165,7 @@ export default function DrawingCanvas() {
             />
 
             <div className="text-input-container">
-                <label htmlFor="canvas-text">Надпись на рисунке:</label>
+                <label htmlFor="canvas-text">Текст на слайде:</label>
                 <textarea
                     id="canvas-text"
                     rows="5"
@@ -157,4 +178,6 @@ export default function DrawingCanvas() {
             {status && <p className="status-line">{status}</p>}
         </div>
     );
-}
+});
+
+export default DrawingCanvas;
