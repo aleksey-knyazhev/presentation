@@ -40,6 +40,9 @@ export default function TemplateList({
                 <p>{template.slideCount ?? 0} стр.</p>
               </div>
               <div className="presentation-actions">
+                <button className="secondary-button" type="button">
+                  Открыть
+                </button>
                 <button
                   className="secondary-button"
                   type="button"
