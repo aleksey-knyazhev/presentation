@@ -67,6 +67,9 @@ export default function TemplateViewer({
                 Вперед
               </button>
             </div>
+            <button className="primary-button" type="button">
+              Создать презентацию
+            </button>
             <button className="secondary-button" type="button" onClick={onClose}>
               К списку
             </button>
