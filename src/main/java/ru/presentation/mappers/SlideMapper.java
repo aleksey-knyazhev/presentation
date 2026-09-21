@@ -14,7 +14,6 @@ public class SlideMapper {
 
     public Slide toSlide(SlideDto dto) {
         return Slide.builder()
-                .id(dto.getId())
                 .imageBytes(decodeImage(dto.getImage()))
                 .text(dto.getText())
                 .textColor(dto.getTextColor())
