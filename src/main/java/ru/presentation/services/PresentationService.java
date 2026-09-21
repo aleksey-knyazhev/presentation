@@ -1,5 +1,6 @@
 package ru.presentation.services;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.presentation.domain.Presentation;
@@ -18,7 +19,7 @@ public class PresentationService {
 
     @Transactional(readOnly = true)
     public List<Presentation> findAll() {
-        return presentationRepository.findAll();
+        return presentationRepository.findAll(Sort.by(Sort.Order.asc("title").ignoreCase()));
     }
 
     @Transactional(readOnly = true)

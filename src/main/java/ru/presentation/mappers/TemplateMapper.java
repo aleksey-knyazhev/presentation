@@ -13,6 +13,7 @@ public class TemplateMapper {
                 .title(resolveTitle(dto))
                 .description(dto.getDescription())
                 .fileName(dto.getFileName())
+                .slideCount(dto.getSlideCount())
                 .build();
     }
 
@@ -22,6 +23,7 @@ public class TemplateMapper {
         dto.setTitle(template.getTitle());
         dto.setDescription(template.getDescription());
         dto.setFileName(template.getFileName());
+        dto.setSlideCount(template.getSlideCount());
         return dto;
     }
 

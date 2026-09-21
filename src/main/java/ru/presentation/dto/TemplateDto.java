@@ -10,4 +10,5 @@ public class TemplateDto {
     private String title;
     private String description;
     private String fileName;
+    private Integer slideCount;
 }

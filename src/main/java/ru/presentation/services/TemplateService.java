@@ -1,11 +1,14 @@
 package ru.presentation.services;
 
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.presentation.domain.Template;
 import ru.presentation.repositories.TemplateRepository;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -20,7 +23,7 @@ public class TemplateService {
 
     @Transactional(readOnly = true)
     public List<Template> findAll() {
-        return templateRepository.findAll();
+        return templateRepository.findAll(Sort.by(Sort.Order.asc("title").ignoreCase()));
     }
 
     @Transactional
@@ -35,12 +38,20 @@ public class TemplateService {
             throw new IllegalArgumentException("Разрешены только файлы .potx");
         }
 
+        byte[] fileBytes = file.getBytes();
         Template template = Template.builder()
                 .title(fileName.replaceFirst("(?i)\\.potx$", ""))
                 .fileName(fileName)
-                .fileBytes(file.getBytes())
+                .slideCount(countSlides(fileBytes))
+                .fileBytes(fileBytes)
                 .build();
         return templateRepository.save(template);
+    }
+
+    private int countSlides(byte[] fileBytes) throws IOException {
+        try (XMLSlideShow slideShow = new XMLSlideShow(new ByteArrayInputStream(fileBytes))) {
+            return slideShow.getSlides().size();
+        }
     }
 
     @Transactional

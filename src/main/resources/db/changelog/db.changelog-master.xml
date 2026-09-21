@@ -20,4 +20,8 @@
     <changeSet id="004-add-template-file" author="aleksey">
         <sqlFile path="sql/20260922001000-add-template-file.sql" relativeToChangelogFile="true"/>
     </changeSet>
+
+    <changeSet id="005-add-template-slide-count" author="aleksey">
+        <sqlFile path="sql/20260922002000-add-template-slide-count.sql" relativeToChangelogFile="true"/>
+    </changeSet>
 </databaseChangeLog>

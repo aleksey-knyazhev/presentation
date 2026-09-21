@@ -32,6 +32,8 @@ public class Template {
 
     private String fileName;
 
+    private Integer slideCount;
+
     @JdbcTypeCode(SqlTypes.VARBINARY)
     @Column(columnDefinition = "bytea")
     private byte[] fileBytes;

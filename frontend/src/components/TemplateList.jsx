@@ -37,6 +37,7 @@ export default function TemplateList({
               <div>
                 <h2>{template.title}</h2>
                 <p>{template.fileName || 'Файл не задан'}</p>
+                <p>{template.slideCount ?? 0} стр.</p>
               </div>
               <div className="presentation-actions">
                 <button
