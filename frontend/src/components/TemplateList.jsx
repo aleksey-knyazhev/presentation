@@ -7,6 +7,12 @@ export default function TemplateList({
   onOpenTemplates,
   templates,
 }) {
+  const uploadTemplate = (event) => {
+    const file = event.target.files?.[0];
+    onAddTemplate(file);
+    event.target.value = '';
+  };
+
   return (
     <main className="app-shell">
       <section className="workspace">
@@ -19,9 +25,10 @@ export default function TemplateList({
             />
             <h1>Шаблоны</h1>
           </div>
-          <button className="primary-button" type="button" onClick={onAddTemplate}>
+          <label className="primary-button file-button">
             Добавить шаблон
-          </button>
+            <input type="file" accept=".potx" onChange={uploadTemplate} />
+          </label>
         </header>
 
         <section className="presentation-list" aria-label="Список шаблонов">
@@ -29,7 +36,7 @@ export default function TemplateList({
             <article className="presentation-item" key={template.id}>
               <div>
                 <h2>{template.title}</h2>
-                <p>{template.description || 'Описание не задано'}</p>
+                <p>{template.fileName || 'Файл не задан'}</p>
               </div>
               <div className="presentation-actions">
                 <button

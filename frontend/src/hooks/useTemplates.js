@@ -4,7 +4,6 @@ import {
   deleteTemplate as deleteTemplateRequest,
   findTemplates,
 } from '../api.js';
-import { createEmptyTemplate } from '../template.js';
 
 export default function useTemplates() {
   const [templates, setTemplates] = useState([]);
@@ -15,11 +14,13 @@ export default function useTemplates() {
       .catch((error) => console.error('Ошибка загрузки шаблонов', error));
   }, []);
 
-  const addTemplate = async () => {
-    const nextTemplate = createEmptyTemplate(templates.length + 1);
+  const addTemplate = async (file) => {
+    if (!file) {
+      return;
+    }
 
     try {
-      const savedTemplate = await createTemplate(nextTemplate);
+      const savedTemplate = await createTemplate(file);
       setTemplates((currentTemplates) => [...currentTemplates, savedTemplate]);
     } catch (error) {
       console.error('Ошибка создания шаблона', error);

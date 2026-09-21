@@ -21,7 +21,7 @@ export default function PresentationList({
             <h1>Презентации</h1>
           </div>
           <button className="primary-button" type="button" onClick={onAddPresentation}>
-            Добавить презентацию
+            Создать презентацию
           </button>
         </header>
 

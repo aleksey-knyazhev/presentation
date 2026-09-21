@@ -12,6 +12,7 @@ public class TemplateMapper {
                 .id(dto.getId())
                 .title(resolveTitle(dto))
                 .description(dto.getDescription())
+                .fileName(dto.getFileName())
                 .build();
     }
 
@@ -20,6 +21,7 @@ public class TemplateMapper {
         dto.setId(template.getId());
         dto.setTitle(template.getTitle());
         dto.setDescription(template.getDescription());
+        dto.setFileName(template.getFileName());
         return dto;
     }
 

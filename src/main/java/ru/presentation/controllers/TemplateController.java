@@ -1,17 +1,20 @@
 package ru.presentation.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import ru.presentation.dto.TemplateDto;
 import ru.presentation.mappers.TemplateMapper;
 import ru.presentation.services.TemplateService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -33,9 +36,9 @@ public class TemplateController {
                 .toList();
     }
 
-    @PostMapping
-    public TemplateDto create(@RequestBody TemplateDto dto) {
-        return templateMapper.toDto(templateService.create(templateMapper.toTemplate(dto)));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public TemplateDto create(@RequestPart("file") MultipartFile file) throws IOException {
+        return templateMapper.toDto(templateService.createFromFile(file));
     }
 
     @DeleteMapping("/{id}")

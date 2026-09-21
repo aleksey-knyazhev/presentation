@@ -1,6 +1,9 @@
 const requestJson = async (url, options = {}) => {
+  const isFormData = options.body instanceof FormData;
   const response = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: isFormData
+      ? options.headers
+      : { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   });
 
@@ -37,11 +40,16 @@ export const deletePresentation = async (presentationId) => {
 
 export const findTemplates = () => requestJson('/api/templates');
 
-export const createTemplate = (template) =>
-  requestJson('/api/templates', {
+export const createTemplate = (file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return requestJson('/api/templates', {
     method: 'POST',
-    body: JSON.stringify(template),
+    headers: {},
+    body: formData,
   });
+};
 
 export const deleteTemplate = async (templateId) => {
   await requestJson(`/api/templates/${templateId}`, {

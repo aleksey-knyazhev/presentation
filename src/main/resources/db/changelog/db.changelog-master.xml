@@ -16,4 +16,8 @@
     <changeSet id="003-create-template-table" author="aleksey">
         <sqlFile path="sql/20260922000000-create-template-table.sql" relativeToChangelogFile="true"/>
     </changeSet>
+
+    <changeSet id="004-add-template-file" author="aleksey">
+        <sqlFile path="sql/20260922001000-add-template-file.sql" relativeToChangelogFile="true"/>
+    </changeSet>
 </databaseChangeLog>
