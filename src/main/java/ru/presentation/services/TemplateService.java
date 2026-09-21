@@ -26,6 +26,21 @@ public class TemplateService {
         return templateRepository.findAll(Sort.by(Sort.Order.asc("title").ignoreCase()));
     }
 
+    @Transactional(readOnly = true)
+    public int countPreviewPages(Long id) throws IOException {
+        Template template = templateRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Шаблон не найден: " + id));
+
+        byte[] fileBytes = template.getFileBytes();
+        if (fileBytes == null || fileBytes.length == 0) {
+            return 0;
+        }
+
+        try (XMLSlideShow slideShow = new XMLSlideShow(new ByteArrayInputStream(fileBytes))) {
+            return slideShow.getSlides().size();
+        }
+    }
+
     @Transactional
     public Template create(Template template) {
         return templateRepository.save(template);

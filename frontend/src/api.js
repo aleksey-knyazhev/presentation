@@ -57,6 +57,9 @@ export const deleteTemplate = async (templateId) => {
   });
 };
 
+export const getTemplatePreviewInfo = (templateId) =>
+  requestJson(`/api/templates/${templateId}/preview-info`);
+
 export const createPresentationPreview = (slide) =>
   fetch('/api/presentation/preview', {
     method: 'POST',

@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import { createPresentationPreview, createTemplatePreview } from './api.js';
+import {
+  createPresentationPreview,
+  createTemplatePreview,
+  getTemplatePreviewInfo,
+} from './api.js';
 import DrawingCanvas from './components/DrawingCanvas.jsx';
 import PresentationEditorHeader from './components/PresentationEditorHeader.jsx';
 import PresentationList from './components/PresentationList.jsx';
@@ -16,6 +20,7 @@ export default function App() {
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState(null);
   const [templateSlideIndex, setTemplateSlideIndex] = useState(0);
+  const [templatePageCount, setTemplatePageCount] = useState(0);
   const {
     activePresentation,
     addPresentation,
@@ -97,6 +102,7 @@ export default function App() {
   const closePresentationEditor = async () => {
     setPreviewTemplate(null);
     setTemplateSlideIndex(0);
+    setTemplatePageCount(0);
     replacePreviewUrl(null);
     await closeEditor();
   };
@@ -104,6 +110,7 @@ export default function App() {
   const openPresentationEditor = async (presentationId) => {
     setPreviewTemplate(null);
     setTemplateSlideIndex(0);
+    setTemplatePageCount(0);
     replacePreviewUrl(null);
     await openPresentation(presentationId);
   };
@@ -129,12 +136,22 @@ export default function App() {
   };
 
   const openTemplate = (template) => {
-    loadTemplatePreview(template, 0);
+    setIsPreviewLoading(true);
+    getTemplatePreviewInfo(template.id)
+      .then((info) => {
+        setTemplatePageCount(info.pageCount || template.slideCount || 1);
+        return loadTemplatePreview(template, 0);
+      })
+      .catch((error) => {
+        console.error('Ошибка загрузки информации о шаблоне', error);
+        setIsPreviewLoading(false);
+      });
   };
 
   const closeTemplateViewer = () => {
     setPreviewTemplate(null);
     setTemplateSlideIndex(0);
+    setTemplatePageCount(0);
     replacePreviewUrl(null);
   };
 
@@ -147,7 +164,7 @@ export default function App() {
   };
 
   const nextTemplateSlide = () => {
-    if (!previewTemplate || templateSlideIndex >= (previewTemplate.slideCount ?? 1) - 1) {
+    if (!previewTemplate || templateSlideIndex >= templatePageCount - 1) {
       return;
     }
 
@@ -160,6 +177,7 @@ export default function App() {
         <TemplateViewer
           template={previewTemplate}
           previewUrl={previewUrl}
+          pageCount={templatePageCount}
           slideIndex={templateSlideIndex}
           isPreviewLoading={isPreviewLoading}
           onClose={closeTemplateViewer}

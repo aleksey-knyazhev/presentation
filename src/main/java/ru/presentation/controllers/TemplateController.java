@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.presentation.dto.TemplateDto;
+import ru.presentation.dto.TemplatePreviewInfoDto;
 import ru.presentation.mappers.TemplateMapper;
 import ru.presentation.services.TemplateService;
 
@@ -39,6 +40,11 @@ public class TemplateController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public TemplateDto create(@RequestPart("file") MultipartFile file) throws IOException {
         return templateMapper.toDto(templateService.createFromFile(file));
+    }
+
+    @GetMapping("/{id}/preview-info")
+    public TemplatePreviewInfoDto getPreviewInfo(@PathVariable Long id) throws IOException {
+        return new TemplatePreviewInfoDto(templateService.countPreviewPages(id));
     }
 
     @DeleteMapping("/{id}")

@@ -24,6 +24,7 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation 'org.apache.poi:poi-ooxml:5.4.1'
+    implementation 'org.apache.xmlgraphics:batik-all:1.18'
 
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"

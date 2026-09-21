@@ -3,11 +3,12 @@ export default function TemplateViewer({
   onClose,
   onNextSlide,
   onPreviousSlide,
+  pageCount,
   previewUrl,
   slideIndex,
   template,
 }) {
-  const slideCount = template.slideCount ?? 0;
+  const slideCount = pageCount || template.slideCount || 1;
 
   return (
     <main className="app-shell">

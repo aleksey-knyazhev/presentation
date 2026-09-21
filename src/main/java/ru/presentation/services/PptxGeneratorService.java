@@ -94,22 +94,15 @@ public class PptxGeneratorService {
 
     private XSLFSlide getOrCreateSlide(XMLSlideShow ppt, int slideIndex) {
         List<XSLFSlide> slides = ppt.getSlides();
-        if (!slides.isEmpty()) {
-            if (slideIndex < 0 || slideIndex >= slides.size()) {
-                throw new IllegalArgumentException("Слайд шаблона не найден: " + slideIndex);
-            }
-
+        if (slideIndex >= 0 && slideIndex < slides.size()) {
             return slides.get(slideIndex);
         }
 
-        for (XSLFSlideMaster slideMaster : ppt.getSlideMasters()) {
-            XSLFSlideLayout[] layouts = slideMaster.getSlideLayouts();
-            if (layouts.length > 0) {
-                return ppt.createSlide(layouts[0]);
-            }
+        if (slides.isEmpty() && slideIndex == 0) {
+            return ppt.createSlide();
         }
 
-        return ppt.createSlide();
+        throw new IllegalArgumentException("Слайд шаблона не найден: " + slideIndex);
     }
 
     private void addPreviewText(XSLFSlide slide, String text) {
