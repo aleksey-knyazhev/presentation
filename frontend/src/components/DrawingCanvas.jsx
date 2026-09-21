@@ -112,7 +112,7 @@ export default function DrawingCanvas() {
             <canvas
                 ref={canvasRef}
                 width={900}
-                height={520}
+                height={347}
                 className="drawing-canvas"
                 onPointerDown={startDrawing}
                 onPointerMove={draw}

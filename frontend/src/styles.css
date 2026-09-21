@@ -135,7 +135,7 @@ h1 {
 .drawing-canvas {
   display: block;
   width: 100%;
-  aspect-ratio: 900 / 520;
+  aspect-ratio: 900 / 347;
   border: 1px solid #b9c4d4;
   border-radius: 6px;
   background: #ffffff;
