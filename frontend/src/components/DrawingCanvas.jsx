@@ -4,6 +4,8 @@ const createEmptySlide = () => ({
     image: null,
     text: '',
     textColor: '#1f2937',
+    history: [],
+    redoStack: [],
 });
 
 const DrawingCanvas = forwardRef(function DrawingCanvas({ onSlideStateChange }, ref) {
@@ -32,8 +34,8 @@ const DrawingCanvas = forwardRef(function DrawingCanvas({ onSlideStateChange }, 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         setText(slide.text || '');
         setStrokeColor(slide.textColor || '#1f2937');
-        setHistory([]);
-        setRedoStack([]);
+        setHistory(slide.history || []);
+        setRedoStack(slide.redoStack || []);
 
         if (!slide.image) {
             return;
@@ -170,6 +172,8 @@ const DrawingCanvas = forwardRef(function DrawingCanvas({ onSlideStateChange }, 
             image: canvas.toDataURL('image/png'),
             text,
             textColor: strokeColor,
+            history,
+            redoStack,
         };
     };
 
