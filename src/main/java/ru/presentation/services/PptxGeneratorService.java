@@ -3,6 +3,7 @@ package ru.presentation.services;
 import org.apache.poi.sl.usermodel.PictureData;
 import org.apache.poi.xslf.usermodel.*;
 import org.springframework.stereotype.Service;
+import ru.presentation.domain.Presentation;
 import ru.presentation.domain.Slide;
 
 import java.io.ByteArrayOutputStream;
@@ -14,13 +15,14 @@ import java.util.List;
 @Service
 public class PptxGeneratorService {
 
-    public byte[] generatePresentation(List<Slide> sourceSlides) throws IOException {
+    public byte[] generatePresentation(Presentation presentation) throws IOException {
         try (XMLSlideShow ppt = new XMLSlideShow();
             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            List<Slide> slides = sourceSlides == null || sourceSlides.isEmpty()
+            List<Slide> presentationSlides = presentation == null ? null : presentation.getSlides();
+            List<Slide> slides = presentationSlides == null || presentationSlides.isEmpty()
                     ? List.of(Slide.builder().build())
-                    : sourceSlides;
+                    : presentationSlides;
 
             for (Slide sourceSlide : slides) {
                 XSLFSlide pptSlide = ppt.createSlide();

@@ -1,7 +1,9 @@
 package ru.presentation.mappers;
 
 import org.springframework.stereotype.Component;
+import ru.presentation.domain.Presentation;
 import ru.presentation.domain.Slide;
+import ru.presentation.dto.PresentationDto;
 import ru.presentation.dto.SlideDto;
 
 import java.util.Base64;
@@ -26,6 +28,12 @@ public class SlideMapper {
         return dtos.stream()
                 .map(this::toSlide)
                 .toList();
+    }
+
+    public Presentation toPresentation(PresentationDto dto) {
+        return Presentation.builder()
+                .slides(toSlides(dto == null ? null : dto.getSlides()))
+                .build();
     }
 
     private byte[] decodeImage(String image) {

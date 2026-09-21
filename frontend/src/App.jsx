@@ -30,9 +30,8 @@ export default function App() {
         <section className="workspace">
           <header className="workspace-header">
             <div>
-              <p className="eyebrow">PowerPoint generator</p>
               <div className="title-row">
-                <h1>Редактор слайда</h1>
+                <h1>Редактор презентаций</h1>
                 <div className="slide-controls">
                   <button
                       className="secondary-button"
