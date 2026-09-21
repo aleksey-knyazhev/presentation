@@ -45,6 +45,13 @@ textarea {
   width: 100%;
 }
 
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
 .eyebrow {
   margin: 0 0 6px;
   color: #607089;
@@ -83,6 +90,56 @@ h1 {
   box-shadow: 0 18px 50px rgba(36, 49, 76, 0.08);
   padding: 18px;
   width: 100%;
+}
+
+.presentation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.presentation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 18px;
+  background: #ffffff;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(36, 49, 76, 0.06);
+}
+
+.presentation-item h2 {
+  margin: 0 0 4px;
+  color: #172033;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.presentation-item p,
+.empty-state p {
+  margin: 0;
+  color: #607089;
+  font-size: 14px;
+}
+
+.presentation-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px dashed #b9c4d4;
+  border-radius: 8px;
 }
 
 .toolbar {
@@ -218,6 +275,14 @@ h1 {
 
   .workspace-header {
     align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-actions,
+  .presentation-actions,
+  .presentation-item,
+  .empty-state {
+    align-items: stretch;
     flex-direction: column;
   }
 

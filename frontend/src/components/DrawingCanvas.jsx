@@ -8,9 +8,11 @@ const createEmptySlide = () => ({
     redoStack: [],
 });
 
-const DrawingCanvas = forwardRef(function DrawingCanvas({ onSlideStateChange }, ref) {
+const DrawingCanvas = forwardRef(function DrawingCanvas({ initialSlides, onSlideStateChange }, ref) {
     const canvasRef = useRef(null);
-    const [slides, setSlides] = useState([createEmptySlide()]);
+    const [slides, setSlides] = useState(() =>
+        initialSlides?.length ? initialSlides : [createEmptySlide()]
+    );
     const [activeSlideIndex, setActiveSlideIndex] = useState(0);
     const [isDrawing, setIsDrawing] = useState(false);
     const [strokeColor, setStrokeColor] = useState('#1f2937');
@@ -244,6 +246,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas({ onSlideStateChange }, 
         addSlide,
         deleteSlide,
         downloadPresentation,
+        getSlides: getSyncedSlides,
         previousSlide: () => openSlide(activeSlideIndex - 1),
         nextSlide: () => openSlide(activeSlideIndex + 1),
     }));
