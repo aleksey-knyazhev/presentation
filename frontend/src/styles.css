@@ -28,18 +28,17 @@ textarea {
   min-height: 100vh;
   padding: 32px;
   display: flex;
-  justify-content: center; /* Центрируем всю рабочую область на экране */
+  justify-content: center; /* Центрируем рабочую область на экране */
 }
 
 .workspace {
-  /* Изменено: теперь рабочая область имеет ширину ровно как панель холста (900px + внутренние отступы 2 * 18px = 936px) */
-  width: 936px;
+  width: 936px; /* 900px холст + 36px внутренние отступы панели */
   margin: 0 auto;
 }
 
 .workspace-header {
   display: flex;
-  align-items: flex-end; /* Выравниваем кнопку по нижней линии заголовка */
+  align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
   margin-bottom: 20px;
@@ -149,14 +148,40 @@ h1 {
   touch-action: none;
 }
 
+/* Новые стили для текстового поля ввода */
+.text-input-container {
+  margin-top: 15px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+.text-input-container label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #374151;
+}
+
+.text-input-container textarea {
+  padding: 10px 12px;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+  font-family: Arial, sans-serif;
+  resize: vertical;
+}
+
 .status-line {
   margin: 12px 0 0;
   color: #42526b;
   font-size: 14px;
+  text-align: left;
 }
 
 @media (max-width: 980px) {
-  /* Адаптивность для экранов меньше ширины нашего интерфейса */
   .workspace {
     width: 100%;
   }

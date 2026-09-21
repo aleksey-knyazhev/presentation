@@ -6,20 +6,20 @@ export default function App() {
   };
 
   return (
-    <main className="app-shell">
-      <section className="workspace">
-        <header className="workspace-header">
-          <div>
-            <p className="eyebrow">PowerPoint generator</p>
-            <h1>Редактор слайда</h1>
-          </div>
-          <button className="primary-button" type="button" onClick={downloadPresentation}>
-            Скачать PPTX
-          </button>
-        </header>
+      <main className="app-shell">
+        <section className="workspace">
+          <header className="workspace-header">
+            <div>
+              <p className="eyebrow">PowerPoint generator</p>
+              <h1>Редактор слайда</h1>
+            </div>
+            <button className="primary-button" type="button" onClick={downloadPresentation}>
+              Скачать PPTX
+            </button>
+          </header>
 
-        <DrawingCanvas />
-      </section>
-    </main>
+          <DrawingCanvas />
+        </section>
+      </main>
   );
 }
