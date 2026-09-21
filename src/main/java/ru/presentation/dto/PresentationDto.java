@@ -8,5 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class PresentationDto {
+    private Long id;
+    private String title;
     private List<SlideDto> slides;
 }

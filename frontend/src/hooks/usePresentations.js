@@ -1,12 +1,24 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  createPresentation,
+  deletePresentation as deletePresentationRequest,
+  findPresentations,
+  updatePresentation,
+} from '../api.js';
 import { createEmptyPresentation } from '../presentation.js';
 
 const initialSlideState = { activeSlideIndex: 0, slideCount: 1 };
 
 export default function usePresentations(drawingCanvasRef) {
-  const [presentations, setPresentations] = useState([createEmptyPresentation(1)]);
+  const [presentations, setPresentations] = useState([]);
   const [activePresentationId, setActivePresentationId] = useState(null);
   const [slideState, setSlideState] = useState(initialSlideState);
+
+  useEffect(() => {
+    findPresentations()
+      .then(setPresentations)
+      .catch((error) => console.error('Ошибка загрузки презентаций', error));
+  }, []);
 
   const activePresentation = useMemo(
     () => presentations.find((presentation) => presentation.id === activePresentationId),
@@ -17,42 +29,65 @@ export default function usePresentations(drawingCanvasRef) {
     setSlideState(initialSlideState);
   };
 
-  const syncActivePresentation = () => {
+  const syncActivePresentation = async () => {
     if (!activePresentationId || !drawingCanvasRef.current) {
       return;
     }
 
     const slides = drawingCanvasRef.current.getSlides();
+    const presentationToSave = presentations.find((presentation) => presentation.id === activePresentationId);
+
+    if (!presentationToSave) {
+      return;
+    }
+
+    const nextPresentation = { ...presentationToSave, slides };
+
     setPresentations((currentPresentations) =>
       currentPresentations.map((presentation) =>
         presentation.id === activePresentationId
-          ? { ...presentation, slides }
+          ? nextPresentation
           : presentation
       )
     );
+
+    try {
+      await updatePresentation(nextPresentation);
+    } catch (error) {
+      console.error('Ошибка сохранения презентации', error);
+    }
   };
 
-  const addPresentation = () => {
-    setPresentations((currentPresentations) => [
-      ...currentPresentations,
-      createEmptyPresentation(currentPresentations.length + 1),
-    ]);
+  const addPresentation = async () => {
+    const nextPresentation = createEmptyPresentation(presentations.length + 1);
+
+    try {
+      const savedPresentation = await createPresentation(nextPresentation);
+      setPresentations((currentPresentations) => [...currentPresentations, savedPresentation]);
+    } catch (error) {
+      console.error('Ошибка создания презентации', error);
+    }
   };
 
-  const deletePresentation = (presentationId) => {
-    setPresentations((currentPresentations) =>
-      currentPresentations.filter((presentation) => presentation.id !== presentationId)
-    );
+  const deletePresentation = async (presentationId) => {
+    try {
+      await deletePresentationRequest(presentationId);
+      setPresentations((currentPresentations) =>
+        currentPresentations.filter((presentation) => presentation.id !== presentationId)
+      );
+    } catch (error) {
+      console.error('Ошибка удаления презентации', error);
+    }
   };
 
-  const openPresentation = (presentationId) => {
-    syncActivePresentation();
+  const openPresentation = async (presentationId) => {
+    await syncActivePresentation();
     setActivePresentationId(presentationId);
     resetSlideState();
   };
 
-  const closeEditor = () => {
-    syncActivePresentation();
+  const closeEditor = async () => {
+    await syncActivePresentation();
     setActivePresentationId(null);
     resetSlideState();
   };

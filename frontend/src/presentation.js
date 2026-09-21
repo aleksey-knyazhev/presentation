@@ -1,5 +1,5 @@
 export const createEmptyPresentation = (index) => ({
-  id: crypto.randomUUID(),
+  id: null,
   title: `Презентация ${index}`,
   slides: null,
 });
