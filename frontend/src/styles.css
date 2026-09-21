@@ -68,6 +68,32 @@ h1 {
   line-height: 1.15;
 }
 
+.section-nav {
+  display: inline-flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 4px;
+  background: #e6ebf2;
+  border-radius: 8px;
+}
+
+.section-nav-button {
+  min-height: 34px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0 12px;
+  background: transparent;
+  color: #42526b;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.section-nav-button.active {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #172033;
+}
+
 .title-row {
   display: flex;
   align-items: center;

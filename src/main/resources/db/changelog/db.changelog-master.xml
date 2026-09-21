@@ -13,4 +13,7 @@
         <sqlFile path="sql/20260921001000-create-presentation-tables.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
+    <changeSet id="003-create-template-table" author="aleksey">
+        <sqlFile path="sql/20260922000000-create-template-table.sql" relativeToChangelogFile="true"/>
+    </changeSet>
 </databaseChangeLog>

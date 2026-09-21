@@ -34,3 +34,17 @@ export const deletePresentation = async (presentationId) => {
     method: 'DELETE',
   });
 };
+
+export const findTemplates = () => requestJson('/api/templates');
+
+export const createTemplate = (template) =>
+  requestJson('/api/templates', {
+    method: 'POST',
+    body: JSON.stringify(template),
+  });
+
+export const deleteTemplate = async (templateId) => {
+  await requestJson(`/api/templates/${templateId}`, {
+    method: 'DELETE',
+  });
+};

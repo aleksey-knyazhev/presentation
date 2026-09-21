@@ -1,14 +1,25 @@
+import SectionNav from './SectionNav.jsx';
+
 export default function PresentationList({
   presentations,
   onAddPresentation,
   onDeletePresentation,
+  onOpenPresentations,
   onOpenPresentation,
+  onOpenTemplates,
 }) {
   return (
     <main className="app-shell">
       <section className="workspace">
         <header className="workspace-header">
-          <h1>Презентации</h1>
+          <div>
+            <SectionNav
+              activeSection="presentations"
+              onOpenPresentations={onOpenPresentations}
+              onOpenTemplates={onOpenTemplates}
+            />
+            <h1>Презентации</h1>
+          </div>
           <button className="primary-button" type="button" onClick={onAddPresentation}>
             Добавить презентацию
           </button>
