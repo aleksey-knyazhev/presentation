@@ -61,6 +61,21 @@ h1 {
   line-height: 1.15;
 }
 
+.title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.slide-controls {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  white-space: nowrap;
+}
+
 .drawing-panel {
   background: #ffffff;
   border: 1px solid #d9e0ea;
@@ -106,6 +121,15 @@ h1 {
   min-width: 38px;
   color: #607089;
   font-variant-numeric: tabular-nums;
+}
+
+.slide-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #42526b;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .primary-button,
@@ -195,6 +219,10 @@ h1 {
   .workspace-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .slide-nav {
+    flex: 0 0 auto;
   }
 
   h1 {

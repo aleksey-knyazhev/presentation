@@ -9,17 +9,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.util.List;
 
 @Service
 public class PptxGeneratorService {
 
-    public byte[] generatePresentation(Slide sourceSlide) throws IOException {
+    public byte[] generatePresentation(List<Slide> sourceSlides) throws IOException {
         try (XMLSlideShow ppt = new XMLSlideShow();
             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-            XSLFSlide pptSlide = ppt.createSlide();
-            addText(pptSlide, sourceSlide.getText(), sourceSlide.getTextColor());
-            addImage(ppt, pptSlide, sourceSlide.getImageBytes());
+            List<Slide> slides = sourceSlides == null || sourceSlides.isEmpty()
+                    ? List.of(Slide.builder().build())
+                    : sourceSlides;
+
+            for (Slide sourceSlide : slides) {
+                XSLFSlide pptSlide = ppt.createSlide();
+                addText(pptSlide, sourceSlide.getText(), sourceSlide.getTextColor());
+                addImage(ppt, pptSlide, sourceSlide.getImageBytes());
+            }
 
             ppt.write(out);
             return out.toByteArray();

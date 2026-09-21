@@ -1,7 +1,15 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
-const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
+const createEmptySlide = () => ({
+    image: null,
+    text: '',
+    textColor: '#1f2937',
+});
+
+const DrawingCanvas = forwardRef(function DrawingCanvas({ onSlideStateChange }, ref) {
     const canvasRef = useRef(null);
+    const [slides, setSlides] = useState([createEmptySlide()]);
+    const [activeSlideIndex, setActiveSlideIndex] = useState(0);
     const [isDrawing, setIsDrawing] = useState(false);
     const [strokeColor, setStrokeColor] = useState('#1f2937');
     const [lineWidth, setLineWidth] = useState(4);
@@ -14,6 +22,37 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
     const [text, setText] = useState('');
     const [textX] = useState(50);
     const [textY] = useState(50);
+
+    useEffect(() => {
+        const slide = slides[activeSlideIndex];
+        if (!slide) return;
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        setText(slide.text || '');
+        setStrokeColor(slide.textColor || '#1f2937');
+        setHistory([]);
+        setRedoStack([]);
+
+        if (!slide.image) {
+            return;
+        }
+
+        const img = new Image();
+        img.src = slide.image;
+        img.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+        };
+    }, [activeSlideIndex, slides]);
+
+    useEffect(() => {
+        onSlideStateChange?.({
+            activeSlideIndex,
+            slideCount: slides.length,
+        });
+    }, [activeSlideIndex, slides.length]);
 
     const startDrawing = (e) => {
         const canvas = canvasRef.current;
@@ -130,7 +169,42 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
         return {
             image: canvas.toDataURL('image/png'),
             text,
+            textColor: strokeColor,
         };
+    };
+
+    const getSyncedSlides = () => {
+        const nextSlides = [...slides];
+        nextSlides[activeSlideIndex] = getSlidePayload();
+        return nextSlides;
+    };
+
+    const addSlide = () => {
+        const nextSlides = [...getSyncedSlides(), createEmptySlide()];
+        setSlides(nextSlides);
+        setActiveSlideIndex(nextSlides.length - 1);
+        setStatus('');
+    };
+
+    const deleteSlide = () => {
+        if (slides.length === 1) {
+            return;
+        }
+
+        const nextSlides = getSyncedSlides().filter((_, index) => index !== activeSlideIndex);
+        setSlides(nextSlides);
+        setActiveSlideIndex(Math.min(activeSlideIndex, nextSlides.length - 1));
+        setStatus('');
+    };
+
+    const openSlide = (nextIndex) => {
+        if (nextIndex < 0 || nextIndex >= slides.length || nextIndex === activeSlideIndex) {
+            return;
+        }
+
+        setSlides(getSyncedSlides());
+        setActiveSlideIndex(nextIndex);
+        setStatus('');
     };
 
     const downloadPresentation = async () => {
@@ -139,7 +213,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
             const response = await fetch('/api/presentation/download', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(getSlidePayload()),
+                body: JSON.stringify({ slides: getSyncedSlides() }),
             });
 
             if (!response.ok) {
@@ -163,7 +237,11 @@ const DrawingCanvas = forwardRef(function DrawingCanvas(_, ref) {
     };
 
     useImperativeHandle(ref, () => ({
+        addSlide,
+        deleteSlide,
         downloadPresentation,
+        previousSlide: () => openSlide(activeSlideIndex - 1),
+        nextSlide: () => openSlide(activeSlideIndex + 1),
     }));
 
     return (

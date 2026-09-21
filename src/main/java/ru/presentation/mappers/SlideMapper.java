@@ -5,6 +5,7 @@ import ru.presentation.domain.Slide;
 import ru.presentation.dto.SlideDto;
 
 import java.util.Base64;
+import java.util.List;
 
 @Component
 public class SlideMapper {
@@ -15,6 +16,16 @@ public class SlideMapper {
                 .text(dto.getText())
                 .textColor(dto.getTextColor())
                 .build();
+    }
+
+    public List<Slide> toSlides(List<SlideDto> dtos) {
+        if (dtos == null || dtos.isEmpty()) {
+            return List.of(Slide.builder().build());
+        }
+
+        return dtos.stream()
+                .map(this::toSlide)
+                .toList();
     }
 
     private byte[] decodeImage(String image) {
