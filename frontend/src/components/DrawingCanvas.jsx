@@ -7,6 +7,11 @@ export default function DrawingCanvas() {
     const [lineWidth, setLineWidth] = useState(4);
     const [status, setStatus] = useState('');
 
+    // Состояние для многострочного текста
+    const [text, setText] = useState('');
+    const [textX] = useState(50);
+    const [textY] = useState(50);
+
     const startDrawing = (e) => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -52,11 +57,27 @@ export default function DrawingCanvas() {
         const ctx = canvas.getContext('2d');
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        setText('');
         setStatus('');
     };
 
     const saveDrawing = async () => {
         const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+
+        // Логика переноса многострочного текста на холст
+        if (text.trim() !== '') {
+            ctx.font = '24px Arial';
+            ctx.fillStyle = strokeColor;
+
+            const lines = text.split('\n'); // Разбиваем по переносу строки
+            const lineHeight = 30; // Межстрочный интервал в пикселях
+
+            lines.forEach((line, index) => {
+                ctx.fillText(line, textX, textY + (index * lineHeight));
+            });
+        }
+
         const dataURL = canvas.toDataURL('image/png');
 
         try {
@@ -64,7 +85,10 @@ export default function DrawingCanvas() {
             const response = await fetch('/api/drawings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: dataURL }),
+                body: JSON.stringify({
+                    image: dataURL,
+                    text: text
+                }),
             });
             const message = await response.text();
 
@@ -80,9 +104,10 @@ export default function DrawingCanvas() {
     };
 
     return (
-        <div className="drawing-panel">
-            <div className="toolbar" aria-label="Настройки кисти">
-                <label className="control">
+        <div className="drawing-panel" style={{ display: 'inline-block' }}>
+            {/* Upper toolbar controls */}
+            <div className="toolbar" aria-label="Настройки кисти" style={{ marginBottom: '10px', display: 'flex', gap: '15px', alignItems: 'center', width: '900px', boxSizing: 'border-box' }}>
+                <label className="control" style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                     Цвет
                     <input
                         type="color"
@@ -90,7 +115,7 @@ export default function DrawingCanvas() {
                         onChange={(e) => setStrokeColor(e.target.value)}
                     />
                 </label>
-                <label className="control range-control">
+                <label className="control range-control" style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                     Толщина
                     <input
                         type="range"
@@ -109,6 +134,7 @@ export default function DrawingCanvas() {
                 </button>
             </div>
 
+            {/* Canvas Area */}
             <canvas
                 ref={canvasRef}
                 width={900}
@@ -119,9 +145,32 @@ export default function DrawingCanvas() {
                 onPointerUp={stopDrawing}
                 onPointerCancel={stopDrawing}
                 onPointerLeave={stopDrawing}
+                style={{ display: 'block', backgroundColor: '#ffffff', width: '900px', border: '1px solid #ccc' }}
             />
 
-            {status && <p className="status-line">{status}</p>}
+            {/* Многострочное текстовое поле ровно по ширине холста */}
+            <div className="text-input-container" style={{ marginTop: '15px', width: '900px', display: 'flex', flexDirection: 'column', gap: '5px', textAlign: 'left', boxSizing: 'border-box' }}>
+                <label htmlFor="canvas-text" style={{ fontWeight: '500', fontSize: '14px', color: '#374151' }}>Надпись на рисунке:</label>
+                <textarea
+                    id="canvas-text"
+                    rows="5" // Задает фиксированную высоту в 5 строк
+                    placeholder="Введите текст (поддерживает перенос строк с помощью Enter)..."
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    style={{
+                        padding: '10px 12px',
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        borderRadius: '6px',
+                        border: '1px solid #d1d5db',
+                        fontSize: '15px',
+                        fontFamily: 'Arial, sans-serif',
+                        resize: 'vertical' // Позволяет менять высоту вручную только по вертикали
+                    }}
+                />
+            </div>
+
+            {status && <p className="status-line" style={{ width: '900px', textAlign: 'left', marginTop: '8px' }}>{status}</p>}
         </div>
     );
 }

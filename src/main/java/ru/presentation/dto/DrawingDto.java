@@ -7,4 +7,5 @@ import lombok.Setter;
 @Setter
 public class DrawingDto {
     private String image; // Base64 строка
+    private String text;  // Текст с описанием или подписью
 }
