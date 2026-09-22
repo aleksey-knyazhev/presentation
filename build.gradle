@@ -15,6 +15,7 @@ ext {
     lombokVersion = '1.18.42'
     mapstructVersion = '1.6.3'
     mockitoVersion = '5.23.0'
+    testcontainersVersion = '1.20.4'
 }
 
 dependencies {
@@ -36,10 +37,46 @@ dependencies {
     testImplementation "org.assertj:assertj-core:${assertjVersion}"
     testImplementation "org.mockito:mockito-core:${mockitoVersion}"
     testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
 
 test {
     useJUnitPlatform()
+}
+
+sourceSets {
+    acceptanceTest {
+        java {
+            srcDir 'src/acceptanceTest/java'
+        }
+        resources {
+            srcDir 'src/acceptanceTest/resources'
+        }
+        compileClasspath += sourceSets.main.output + configurations.testCompileClasspath
+        runtimeClasspath += output + compileClasspath + sourceSets.main.runtimeClasspath
+    }
+}
+
+configurations {
+    acceptanceTestImplementation.extendsFrom testImplementation
+    acceptanceTestRuntimeOnly.extendsFrom testRuntimeOnly
+    acceptanceTestCompileOnly.extendsFrom testCompileOnly
+    acceptanceTestAnnotationProcessor.extendsFrom testAnnotationProcessor
+}
+
+tasks.register('acceptanceTest', Test) {
+    description = 'Runs backend acceptance tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.acceptanceTest.output.classesDirs
+    classpath = sourceSets.acceptanceTest.runtimeClasspath
+    shouldRunAfter test
+    useJUnitPlatform()
+}
+
+check {
+    dependsOn acceptanceTest
 }
