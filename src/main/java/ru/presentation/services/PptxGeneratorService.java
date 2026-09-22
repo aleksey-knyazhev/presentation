@@ -43,8 +43,8 @@ public class PptxGeneratorService {
 
             for (Slide sourceSlide : slides) {
                 XSLFSlide pptSlide = ppt.createSlide();
+                addFullSlideImage(ppt, pptSlide, sourceSlide.getImageBytes());
                 addText(pptSlide, sourceSlide.getText(), sourceSlide.getTextColor());
-                addImage(ppt, pptSlide, sourceSlide.getImageBytes());
             }
 
             ppt.write(out);
@@ -203,5 +203,16 @@ public class PptxGeneratorService {
         XSLFPictureData pictureData = ppt.addPicture(imageBytes, PictureData.PictureType.PNG);
         XSLFPictureShape picture = pptSlide.createPicture(pictureData);
         picture.setAnchor(new Rectangle(50, 140, 620, 240));
+    }
+
+    private void addFullSlideImage(XMLSlideShow ppt, XSLFSlide pptSlide, byte[] imageBytes) {
+        if (imageBytes == null || imageBytes.length == 0) {
+            return;
+        }
+
+        Dimension pageSize = ppt.getPageSize();
+        XSLFPictureData pictureData = ppt.addPicture(imageBytes, PictureData.PictureType.PNG);
+        XSLFPictureShape picture = pptSlide.createPicture(pictureData);
+        picture.setAnchor(new Rectangle(0, 0, pageSize.width, pageSize.height));
     }
 }
