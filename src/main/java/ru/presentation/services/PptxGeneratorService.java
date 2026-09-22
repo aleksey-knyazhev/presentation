@@ -24,7 +24,7 @@ import java.util.List;
 public class PptxGeneratorService {
 
     private static final int PREVIEW_WIDTH = 900;
-    private static final int PREVIEW_HEIGHT = 339;
+    private static final int PREVIEW_HEIGHT = 356;
 
     private final TemplateRepository templateRepository;
 
