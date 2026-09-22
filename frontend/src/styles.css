@@ -303,7 +303,6 @@ h1 {
 .drawing-canvas {
   display: block;
   width: 100%;
-  aspect-ratio: 900 / 450;
   border: 1px solid #b9c4d4;
   border-radius: 6px;
   background: #ffffff;
@@ -311,7 +310,6 @@ h1 {
   touch-action: none;
 }
 
-/* Новые стили для текстового поля ввода */
 .text-input-container {
   margin-top: 15px;
   width: 100%;
@@ -364,7 +362,6 @@ h1 {
 
 .template-viewer-panel img {
   width: 100%;
-  aspect-ratio: 900 / 450;
   object-fit: fill;
 }
 

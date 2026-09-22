@@ -1,5 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import useSlideEditor from '../hooks/useSlideEditor.js';
+import { SLIDE_ASPECT_RATIO, SLIDE_HEIGHT, SLIDE_WIDTH } from '../slideLayout.js';
 import DrawingToolbar from './DrawingToolbar.jsx';
 
 const DrawingCanvas = forwardRef(function DrawingCanvas({ initialSlides, onSlideStateChange }, ref) {
@@ -31,9 +32,10 @@ const DrawingCanvas = forwardRef(function DrawingCanvas({ initialSlides, onSlide
 
             <canvas
                 ref={canvasRef}
-                width={900}
-                height={498}
+                width={SLIDE_WIDTH}
+                height={SLIDE_HEIGHT}
                 className="drawing-canvas"
+                style={{ aspectRatio: SLIDE_ASPECT_RATIO }}
                 onPointerDown={editor.startDrawing}
                 onPointerMove={editor.draw}
                 onPointerUp={editor.stopDrawing}

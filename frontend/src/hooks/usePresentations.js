@@ -30,6 +30,10 @@ export default function usePresentations(drawingCanvasRef) {
     setSlideState(initialSlideState);
   };
 
+  const appendPresentation = (presentation) => {
+    setPresentations((currentPresentations) => [...currentPresentations, presentation]);
+  };
+
   const syncActivePresentation = async () => {
     if (!activePresentationId || !drawingCanvasRef.current) {
       return;
@@ -67,7 +71,7 @@ export default function usePresentations(drawingCanvasRef) {
 
     try {
       const savedPresentation = await createPresentation(nextPresentation);
-      setPresentations((currentPresentations) => [...currentPresentations, savedPresentation]);
+      appendPresentation(savedPresentation);
       return savedPresentation;
     } catch (error) {
       console.error('Ошибка создания презентации', error);
@@ -78,7 +82,7 @@ export default function usePresentations(drawingCanvasRef) {
   const addPresentationFromTemplate = async (templateId) => {
     try {
       const savedPresentation = await createPresentationFromTemplateRequest(templateId);
-      setPresentations((currentPresentations) => [...currentPresentations, savedPresentation]);
+      appendPresentation(savedPresentation);
       return savedPresentation;
     } catch (error) {
       console.error('Ошибка создания презентации по шаблону', error);

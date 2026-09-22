@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { downloadPresentationFile } from '../api.js';
 import { clearCanvas, drawImageOnCanvas, getCanvasPoint, restoreCanvasSnapshot } from '../canvas.js';
 import { createEmptySlide, DEFAULT_STROKE_COLOR } from '../slide.js';
 import { downloadBlob } from '../download.js';
@@ -162,17 +163,8 @@ export default function useSlideEditor({ canvasRef, initialSlides, onSlideStateC
   const downloadPresentation = async () => {
     try {
       setStatus('Готовим PPTX...');
-      const response = await fetch('/api/presentation/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slides: getSyncedSlides() }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Не удалось скачать PPTX');
-      }
-
-      downloadBlob(await response.blob(), 'generated_report.pptx');
+      const blob = await downloadPresentationFile(getSyncedSlides());
+      downloadBlob(blob, 'generated_report.pptx');
       setStatus('PPTX скачан');
     } catch (err) {
       console.error('Ошибка скачивания PPTX', err);

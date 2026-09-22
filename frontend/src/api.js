@@ -8,7 +8,7 @@ const requestJson = async (url, options = {}) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    throw new Error(`Request failed: ${options.method || 'GET'} ${url}: ${response.status}`);
   }
 
   if (response.status === 204) {
@@ -16,6 +16,19 @@ const requestJson = async (url, options = {}) => {
   }
 
   return response.json();
+};
+
+const requestBlob = async (url, options = {}) => {
+  const response = await fetch(url, {
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...options,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${options.method || 'GET'} ${url}: ${response.status}`);
+  }
+
+  return response.blob();
 };
 
 export const findPresentations = () => requestJson('/api/presentations');
@@ -67,7 +80,7 @@ export const getTemplatePreviewInfo = (templateId) =>
   requestJson(`/api/templates/${templateId}/preview-info`);
 
 export const createTemplatePreview = (templateId, slideIndex = 0) =>
-  fetch('/api/presentation/preview', {
+  requestBlob('/api/presentation/preview', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ templateId, slideIndex }),
@@ -76,4 +89,10 @@ export const createTemplatePreview = (templateId, slideIndex = 0) =>
 export const createPresentationFromTemplate = (templateId) =>
   requestJson(`/api/templates/${templateId}/presentations`, {
     method: 'POST',
+  });
+
+export const downloadPresentationFile = (slides) =>
+  requestBlob('/api/presentation/download', {
+    method: 'POST',
+    body: JSON.stringify({ slides }),
   });

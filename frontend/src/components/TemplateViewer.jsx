@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { SLIDE_ASPECT_RATIO } from '../slideLayout.js';
 
 export default function TemplateViewer({
   isPreviewLoading,
@@ -79,7 +80,13 @@ export default function TemplateViewer({
 
         <section className="preview-panel template-viewer-panel" aria-label="Превью шаблона">
           {isPreviewLoading && <p className="status-line">Загрузка превью...</p>}
-          {previewUrl && <img src={previewUrl} alt="Превью шаблона" />}
+          {previewUrl && (
+            <img
+              src={previewUrl}
+              alt="Превью шаблона"
+              style={{ aspectRatio: SLIDE_ASPECT_RATIO }}
+            />
+          )}
         </section>
       </section>
     </main>
