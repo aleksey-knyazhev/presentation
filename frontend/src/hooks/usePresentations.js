@@ -5,7 +5,7 @@ import {
   findPresentations,
   updatePresentation,
 } from '../api.js';
-import { createEmptyPresentation } from '../presentation.js';
+import { createEmptyPresentation, getNextPresentationTitle } from '../presentation.js';
 
 const initialSlideState = { activeSlideIndex: 0, slideCount: 1 };
 
@@ -59,13 +59,18 @@ export default function usePresentations(drawingCanvasRef) {
   };
 
   const addPresentation = async () => {
-    const nextPresentation = createEmptyPresentation(presentations.length + 1);
+    const nextPresentation = {
+      ...createEmptyPresentation(presentations.length + 1),
+      title: getNextPresentationTitle(presentations),
+    };
 
     try {
       const savedPresentation = await createPresentation(nextPresentation);
       setPresentations((currentPresentations) => [...currentPresentations, savedPresentation]);
+      return savedPresentation;
     } catch (error) {
       console.error('Ошибка создания презентации', error);
+      return null;
     }
   };
 

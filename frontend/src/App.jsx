@@ -75,6 +75,7 @@ export default function App() {
 
   const closePresentationEditor = async () => {
     setPreviewTemplate(null);
+    setActiveSection('presentations');
     setTemplateSlideIndex(0);
     setTemplatePageCount(0);
     replacePreviewUrl(null);
@@ -87,6 +88,15 @@ export default function App() {
     setTemplatePageCount(0);
     replacePreviewUrl(null);
     await openPresentation(presentationId);
+  };
+
+  const createAndOpenPresentation = async () => {
+    const savedPresentation = await addPresentation();
+    if (!savedPresentation) {
+      return;
+    }
+
+    await openPresentationEditor(savedPresentation.id);
   };
 
   const loadTemplatePreview = async (template, slideIndex) => {
@@ -129,6 +139,16 @@ export default function App() {
     replacePreviewUrl(null);
   };
 
+  const createPresentationFromTemplate = async () => {
+    const savedPresentation = await addPresentation();
+    if (!savedPresentation) {
+      return;
+    }
+
+    closeTemplateViewer();
+    await openPresentation(savedPresentation.id);
+  };
+
   const previousTemplateSlide = () => {
     if (!previewTemplate || templateSlideIndex === 0) {
       return;
@@ -168,6 +188,7 @@ export default function App() {
           isPreviewLoading={isPreviewLoading}
           onRenameTemplate={renameActiveTemplate}
           onClose={closeTemplateViewer}
+          onCreatePresentation={createPresentationFromTemplate}
           onPreviousSlide={previousTemplateSlide}
           onNextSlide={nextTemplateSlide}
         />
@@ -191,7 +212,7 @@ export default function App() {
     return (
       <PresentationList
         presentations={presentations}
-        onAddPresentation={addPresentation}
+        onAddPresentation={createAndOpenPresentation}
         onDeletePresentation={deletePresentation}
         onOpenPresentations={() => setActiveSection('presentations')}
         onOpenPresentation={openPresentationEditor}

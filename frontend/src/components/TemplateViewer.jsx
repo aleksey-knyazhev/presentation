@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 export default function TemplateViewer({
   isPreviewLoading,
   onClose,
+  onCreatePresentation,
   onNextSlide,
   onPreviousSlide,
   onRenameTemplate,
@@ -67,11 +68,11 @@ export default function TemplateViewer({
                 Вперед
               </button>
             </div>
-            <button className="primary-button" type="button">
-              Создать презентацию
-            </button>
             <button className="secondary-button" type="button" onClick={onClose}>
               К списку
+            </button>
+            <button className="primary-button" type="button" onClick={onCreatePresentation}>
+              Создать презентацию
             </button>
           </div>
         </header>
