@@ -16,6 +16,8 @@ import java.util.List;
 @Service
 public class PresentationPptxService {
 
+    private static final double SLIDE_IMAGE_HEIGHT_RATIO = 0.8;
+
     public byte[] generatePresentation(Presentation presentation) throws IOException {
         try (XMLSlideShow ppt = new XMLSlideShow();
             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -64,24 +66,16 @@ public class PresentationPptxService {
         }
     }
 
-    private void addImage(XMLSlideShow ppt, XSLFSlide pptSlide, byte[] imageBytes) {
-        if (imageBytes == null || imageBytes.length == 0) {
-            return;
-        }
-
-        XSLFPictureData pictureData = ppt.addPicture(imageBytes, PictureData.PictureType.PNG);
-        XSLFPictureShape picture = pptSlide.createPicture(pictureData);
-        picture.setAnchor(new Rectangle(50, 140, 620, 240));
-    }
-
     private void addFullSlideImage(XMLSlideShow ppt, XSLFSlide pptSlide, byte[] imageBytes) {
         if (imageBytes == null || imageBytes.length == 0) {
             return;
         }
 
         Dimension pageSize = ppt.getPageSize();
+        int imageHeight = (int) Math.round(pageSize.height * SLIDE_IMAGE_HEIGHT_RATIO);
+        int imageTop = (pageSize.height - imageHeight) / 2;
         XSLFPictureData pictureData = ppt.addPicture(imageBytes, PictureData.PictureType.PNG);
         XSLFPictureShape picture = pptSlide.createPicture(pictureData);
-        picture.setAnchor(new Rectangle(0, 0, pageSize.width, pageSize.height));
+        picture.setAnchor(new Rectangle(0, imageTop, pageSize.width, imageHeight));
     }
 }
