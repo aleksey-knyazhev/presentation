@@ -15,7 +15,7 @@ export const drawImageOnCanvas = (canvas, imageDataUrl) => {
   img.src = imageDataUrl;
   img.onload = () => {
     clearCanvas(canvas);
-    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   };
 };
 
@@ -42,6 +42,6 @@ export const restoreCanvasSnapshot = (canvas, snapshot) => {
   img.src = snapshot;
   img.onload = () => {
     clearCanvas(canvas);
-    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   };
 };
