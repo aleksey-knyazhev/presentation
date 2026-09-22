@@ -32,7 +32,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas({ initialSlides, onSlide
             <canvas
                 ref={canvasRef}
                 width={900}
-                height={267}
+                height={339}
                 className="drawing-canvas"
                 onPointerDown={editor.startDrawing}
                 onPointerMove={editor.draw}
@@ -45,7 +45,7 @@ const DrawingCanvas = forwardRef(function DrawingCanvas({ initialSlides, onSlide
                 <label htmlFor="canvas-text">Текст на слайде:</label>
                 <textarea
                     id="canvas-text"
-                    rows="5"
+                    rows="3"
                     placeholder="Введите text (поддерживает перенос строк с помощью Enter)..."
                     value={editor.text}
                     onChange={(e) => editor.setText(e.target.value)}

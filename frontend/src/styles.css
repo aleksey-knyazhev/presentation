@@ -26,7 +26,7 @@ textarea {
 
 .app-shell {
   min-height: 100vh;
-  padding: 32px;
+  padding: 16px 32px 32px;
   display: flex;
   justify-content: center; /* Центрируем рабочую область на экране */
 }
@@ -303,7 +303,7 @@ h1 {
 .drawing-canvas {
   display: block;
   width: 100%;
-  aspect-ratio: 900 / 267;
+  aspect-ratio: 900 / 339;
   border: 1px solid #b9c4d4;
   border-radius: 6px;
   background: #ffffff;
@@ -391,7 +391,7 @@ h1 {
 
 @media (max-width: 680px) {
   .app-shell {
-    padding: 18px;
+    padding: 9px 18px 18px;
   }
 
   .workspace-header {
