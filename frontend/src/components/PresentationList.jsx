@@ -2,6 +2,7 @@ import SectionNav from './SectionNav.jsx';
 
 export default function PresentationList({
   presentations,
+  isLoadingPresentations,
   onAddPresentation,
   onDeletePresentation,
   onOpenPresentations,
@@ -20,7 +21,12 @@ export default function PresentationList({
             />
             <h1>Презентации</h1>
           </div>
-          <button className="primary-button" type="button" onClick={onAddPresentation}>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={onAddPresentation}
+            disabled={isLoadingPresentations}
+          >
             Создать пустую презентацию
           </button>
         </header>

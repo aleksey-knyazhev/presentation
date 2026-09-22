@@ -19,6 +19,7 @@ export default function App() {
     deletePresentation,
     openPresentation,
     presentations,
+    isLoadingPresentations,
     renameActivePresentation,
     setSlideState,
     slideState,
@@ -122,6 +123,7 @@ export default function App() {
         presentations={presentations}
         onAddPresentation={handleCreatePresentation}
         onDeletePresentation={deletePresentation}
+        isLoadingPresentations={isLoadingPresentations}
         onOpenPresentations={() => setActiveSection('presentations')}
         onOpenPresentation={handleOpenPresentationEditor}
         onOpenTemplates={() => setActiveSection('templates')}

@@ -12,13 +12,15 @@ const initialSlideState = { activeSlideIndex: 0, slideCount: 1 };
 
 export default function usePresentations(drawingCanvasRef) {
   const [presentations, setPresentations] = useState([]);
+  const [isLoadingPresentations, setIsLoadingPresentations] = useState(true);
   const [activePresentationId, setActivePresentationId] = useState(null);
   const [slideState, setSlideState] = useState(initialSlideState);
 
   useEffect(() => {
     findPresentations()
       .then(setPresentations)
-      .catch((error) => console.error('Ошибка загрузки презентаций', error));
+      .catch((error) => console.error('Ошибка загрузки презентаций', error))
+      .finally(() => setIsLoadingPresentations(false));
   }, []);
 
   const activePresentation = useMemo(
@@ -131,6 +133,7 @@ export default function usePresentations(drawingCanvasRef) {
     deletePresentation,
     openPresentation,
     presentations,
+    isLoadingPresentations,
     renameActivePresentation,
     setSlideState,
     slideState,
