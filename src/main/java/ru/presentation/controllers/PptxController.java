@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.presentation.domain.Presentation;
 import ru.presentation.dto.PresentationDto;
 import ru.presentation.dto.PreviewRequestDto;
-import ru.presentation.mappers.SlideMapper;
-import ru.presentation.services.PptxGeneratorService;
+import ru.presentation.mappers.PresentationMapper;
+import ru.presentation.services.PresentationPptxService;
+import ru.presentation.services.TemplateRenderService;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -22,62 +23,58 @@ import java.util.Base64;
 @RequestMapping("/api/presentation")
 public class PptxController {
 
-    private final PptxGeneratorService generatorService;
-    private final SlideMapper slideMapper;
+    private final PresentationPptxService presentationPptxService;
+    private final TemplateRenderService templateRenderService;
+    private final PresentationMapper presentationMapper;
 
-    public PptxController(PptxGeneratorService generatorService, SlideMapper slideMapper) {
-        this.generatorService = generatorService;
-        this.slideMapper = slideMapper;
+    public PptxController(
+            PresentationPptxService presentationPptxService,
+            TemplateRenderService templateRenderService,
+            PresentationMapper presentationMapper
+    ) {
+        this.presentationPptxService = presentationPptxService;
+        this.templateRenderService = templateRenderService;
+        this.presentationMapper = presentationMapper;
     }
 
     @GetMapping("/download")
-    public ResponseEntity<byte[]> downloadPresentation() {
-        return buildPresentationResponse(slideMapper.toPresentation(null));
+    public ResponseEntity<byte[]> downloadPresentation() throws IOException {
+        return buildPresentationResponse(presentationMapper.toPresentation(null));
     }
 
     @PostMapping("/download")
-    public ResponseEntity<byte[]> downloadPresentation(@RequestBody PresentationDto dto) {
-        return buildPresentationResponse(slideMapper.toPresentation(dto));
+    public ResponseEntity<byte[]> downloadPresentation(@RequestBody PresentationDto dto) throws IOException {
+        return buildPresentationResponse(presentationMapper.toPresentation(dto));
     }
 
     @PostMapping("/preview")
-    public ResponseEntity<byte[]> previewPresentation(@RequestBody PreviewRequestDto dto) {
-        try {
-            byte[] imageBytes = decodeImage(dto == null ? null : dto.getImage());
-            Long templateId = dto == null || dto.getTemplateId() == null ? 1L : dto.getTemplateId();
-            int slideIndex = dto == null || dto.getSlideIndex() == null ? 0 : dto.getSlideIndex();
-            byte[] previewBytes = generatorService.generateImagePreviewFromTemplate(
-                    templateId,
-                    slideIndex,
-                    dto == null ? null : dto.getText(),
-                    imageBytes
-            );
+    public ResponseEntity<byte[]> previewPresentation(@RequestBody PreviewRequestDto dto) throws IOException {
+        byte[] imageBytes = decodeImage(dto == null ? null : dto.getImage());
+        Long templateId = dto == null || dto.getTemplateId() == null ? 1L : dto.getTemplateId();
+        int slideIndex = dto == null || dto.getSlideIndex() == null ? 0 : dto.getSlideIndex();
+        byte[] previewBytes = templateRenderService.generateImagePreviewFromTemplate(
+                templateId,
+                slideIndex,
+                dto == null ? null : dto.getText(),
+                imageBytes
+        );
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_PNG);
-            headers.setCacheControl("no-store");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_PNG);
+        headers.setCacheControl("no-store");
 
-            return new ResponseEntity<>(previewBytes, headers, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(previewBytes, headers, HttpStatus.OK);
     }
 
-    private ResponseEntity<byte[]> buildPresentationResponse(Presentation presentation) {
-        try {
-            byte[] pptxBytes = generatorService.generatePresentation(presentation);
+    private ResponseEntity<byte[]> buildPresentationResponse(Presentation presentation) throws IOException {
+        byte[] pptxBytes = presentationPptxService.generatePresentation(presentation);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.presentationml.presentation"));
-            headers.setContentDispositionFormData("attachment", "generated_report.pptx");
-            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.presentationml.presentation"));
+        headers.setContentDispositionFormData("attachment", "generated_report.pptx");
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
-            return new ResponseEntity<>(pptxBytes, headers, HttpStatus.OK);
-        } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(pptxBytes, headers, HttpStatus.OK);
     }
 
     private byte[] decodeImage(String image) {

@@ -14,11 +14,11 @@ import java.util.Set;
 public class PresentationService {
 
     private final PresentationRepository presentationRepository;
-    private final PptxGeneratorService pptxGeneratorService;
+    private final TemplateRenderService templateRenderService;
 
-    public PresentationService(PresentationRepository presentationRepository, PptxGeneratorService pptxGeneratorService) {
+    public PresentationService(PresentationRepository presentationRepository, TemplateRenderService templateRenderService) {
         this.presentationRepository = presentationRepository;
-        this.pptxGeneratorService = pptxGeneratorService;
+        this.templateRenderService = templateRenderService;
     }
 
     @Transactional(readOnly = true)
@@ -43,7 +43,7 @@ public class PresentationService {
                 .title(getNextPresentationTitle())
                 .build();
 
-        pptxGeneratorService.generateTemplateSlideImages(templateId).stream()
+        templateRenderService.generateTemplateSlideImages(templateId).stream()
                 .map(imageBytes -> Slide.builder()
                         .imageBytes(imageBytes)
                         .text("")

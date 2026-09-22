@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.presentation.dto.PresentationDto;
 import ru.presentation.dto.TemplateDto;
 import ru.presentation.dto.TemplatePreviewInfoDto;
-import ru.presentation.mappers.SlideMapper;
+import ru.presentation.mappers.PresentationMapper;
 import ru.presentation.mappers.TemplateMapper;
 import ru.presentation.services.PresentationService;
 import ru.presentation.services.TemplateService;
@@ -30,18 +30,18 @@ public class TemplateController {
     private final TemplateService templateService;
     private final TemplateMapper templateMapper;
     private final PresentationService presentationService;
-    private final SlideMapper slideMapper;
+    private final PresentationMapper presentationMapper;
 
     public TemplateController(
             TemplateService templateService,
             TemplateMapper templateMapper,
             PresentationService presentationService,
-            SlideMapper slideMapper
+            PresentationMapper presentationMapper
     ) {
         this.templateService = templateService;
         this.templateMapper = templateMapper;
         this.presentationService = presentationService;
-        this.slideMapper = slideMapper;
+        this.presentationMapper = presentationMapper;
     }
 
     @GetMapping
@@ -68,7 +68,7 @@ public class TemplateController {
 
     @PostMapping("/{id}/presentations")
     public PresentationDto createPresentation(@PathVariable Long id) throws IOException {
-        return slideMapper.toDto(presentationService.createFromTemplate(id));
+        return presentationMapper.toDto(presentationService.createFromTemplate(id));
     }
 
     @DeleteMapping("/{id}")

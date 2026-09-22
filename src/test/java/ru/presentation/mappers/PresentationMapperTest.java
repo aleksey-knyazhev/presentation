@@ -10,9 +10,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SlideMapperTest {
+class PresentationMapperTest {
 
-    private final SlideMapper mapper = new SlideMapper();
+    private final PresentationMapper mapper = new PresentationMapper(new SlideMapper());
 
     @Test
     void toPresentationDoesNotReuseInboundSlideIds() {

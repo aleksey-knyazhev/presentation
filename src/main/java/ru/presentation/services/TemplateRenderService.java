@@ -1,69 +1,45 @@
 package ru.presentation.services;
 
 import org.apache.poi.sl.usermodel.PictureData;
-import org.apache.poi.xslf.usermodel.*;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFPictureData;
+import org.apache.poi.xslf.usermodel.XSLFPictureShape;
+import org.apache.poi.xslf.usermodel.XSLFShape;
+import org.apache.poi.xslf.usermodel.XSLFSlide;
+import org.apache.poi.xslf.usermodel.XSLFTextBox;
+import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
+import org.apache.poi.xslf.usermodel.XSLFTextRun;
 import org.springframework.stereotype.Service;
-import ru.presentation.domain.Presentation;
-import ru.presentation.domain.Slide;
 import ru.presentation.domain.Template;
 import ru.presentation.repositories.TemplateRepository;
 
 import javax.imageio.ImageIO;
-import java.awt.Dimension;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class PptxGeneratorService {
+public class TemplateRenderService {
 
     private static final int PREVIEW_WIDTH = 900;
     private static final int PREVIEW_HEIGHT = 498;
 
     private final TemplateRepository templateRepository;
 
-    public PptxGeneratorService(TemplateRepository templateRepository) {
+    public TemplateRenderService(TemplateRepository templateRepository) {
         this.templateRepository = templateRepository;
     }
 
-    public byte[] generatePresentation(Presentation presentation) throws IOException {
-        try (XMLSlideShow ppt = new XMLSlideShow();
-            ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-
-            List<Slide> presentationSlides = presentation == null ? null : presentation.getSlides();
-            List<Slide> slides = presentationSlides == null || presentationSlides.isEmpty()
-                    ? List.of(Slide.builder().build())
-                    : presentationSlides;
-
-            for (Slide sourceSlide : slides) {
-                XSLFSlide pptSlide = ppt.createSlide();
-                addFullSlideImage(ppt, pptSlide, sourceSlide.getImageBytes());
-                addText(pptSlide, sourceSlide.getText(), sourceSlide.getTextColor());
-            }
-
-            ppt.write(out);
-            return out.toByteArray();
-        }
-    }
-
-    public byte[] generateImagePreviewFromTemplate(Long templateId, String userText, byte[] userImageBytes) throws Exception {
-        return generateImagePreviewFromTemplate(templateId, 0, userText, userImageBytes);
-    }
-
-    public byte[] generateImagePreviewFromTemplate(Long templateId, int slideIndex, String userText, byte[] userImageBytes) throws Exception {
-        Template template = templateRepository.findById(templateId)
-                .orElseThrow(() -> new IllegalArgumentException("Шаблон не найден: " + templateId));
-
-        byte[] templateBytes = template.getFileBytes();
-        if (templateBytes == null || templateBytes.length == 0) {
-            throw new IllegalArgumentException("Файл шаблона пустой: " + templateId);
-        }
+    public byte[] generateImagePreviewFromTemplate(Long templateId, int slideIndex, String userText, byte[] userImageBytes) throws IOException {
+        byte[] templateBytes = getTemplateBytes(templateId);
 
         try (XMLSlideShow ppt = new XMLSlideShow(new ByteArrayInputStream(templateBytes))) {
             XSLFSlide slide = getOrCreateSlide(ppt, slideIndex);
@@ -75,6 +51,18 @@ public class PptxGeneratorService {
     }
 
     public List<byte[]> generateTemplateSlideImages(Long templateId) throws IOException {
+        byte[] templateBytes = getTemplateBytes(templateId);
+
+        try (XMLSlideShow ppt = new XMLSlideShow(new ByteArrayInputStream(templateBytes))) {
+            List<byte[]> slideImages = new ArrayList<>();
+            for (XSLFSlide slide : ppt.getSlides()) {
+                slideImages.add(renderSlideToPng(ppt, slide));
+            }
+            return slideImages;
+        }
+    }
+
+    private byte[] getTemplateBytes(Long templateId) {
         Template template = templateRepository.findById(templateId)
                 .orElseThrow(() -> new IllegalArgumentException("Шаблон не найден: " + templateId));
 
@@ -83,19 +71,7 @@ public class PptxGeneratorService {
             throw new IllegalArgumentException("Файл шаблона пустой: " + templateId);
         }
 
-        try (XMLSlideShow ppt = new XMLSlideShow(new ByteArrayInputStream(templateBytes))) {
-            return ppt.getSlides().stream()
-                    .map(slide -> renderSlideToPngUnchecked(ppt, slide))
-                    .toList();
-        }
-    }
-
-    private byte[] renderSlideToPngUnchecked(XMLSlideShow ppt, XSLFSlide slide) {
-        try {
-            return renderSlideToPng(ppt, slide);
-        } catch (IOException e) {
-            throw new IllegalStateException("Не удалось создать изображение слайда", e);
-        }
+        return templateBytes;
     }
 
     private byte[] renderSlideToPng(XMLSlideShow ppt, XSLFSlide slide) throws IOException {
@@ -167,34 +143,6 @@ public class PptxGeneratorService {
         return null;
     }
 
-    private void addText(XSLFSlide pptSlide, String text, String textColor) {
-        if (text == null || text.isBlank()) {
-            return;
-        }
-
-        XSLFTextBox textBox = pptSlide.createTextBox();
-        textBox.setAnchor(new Rectangle(50, 35, 620, 90));
-
-        XSLFTextParagraph paragraph = textBox.addNewTextParagraph();
-        XSLFTextRun textRun = paragraph.addNewTextRun();
-        textRun.setText(text);
-        textRun.setFontSize(28.0);
-        textRun.setFontColor(parseColor(textColor));
-        textRun.setBold(true);
-    }
-
-    private Color parseColor(String color) {
-        if (color == null || color.isBlank()) {
-            return Color.BLACK;
-        }
-
-        try {
-            return Color.decode(color);
-        } catch (NumberFormatException e) {
-            return Color.BLACK;
-        }
-    }
-
     private void addImage(XMLSlideShow ppt, XSLFSlide pptSlide, byte[] imageBytes) {
         if (imageBytes == null || imageBytes.length == 0) {
             return;
@@ -203,16 +151,5 @@ public class PptxGeneratorService {
         XSLFPictureData pictureData = ppt.addPicture(imageBytes, PictureData.PictureType.PNG);
         XSLFPictureShape picture = pptSlide.createPicture(pictureData);
         picture.setAnchor(new Rectangle(50, 140, 620, 240));
-    }
-
-    private void addFullSlideImage(XMLSlideShow ppt, XSLFSlide pptSlide, byte[] imageBytes) {
-        if (imageBytes == null || imageBytes.length == 0) {
-            return;
-        }
-
-        Dimension pageSize = ppt.getPageSize();
-        XSLFPictureData pictureData = ppt.addPicture(imageBytes, PictureData.PictureType.PNG);
-        XSLFPictureShape picture = pptSlide.createPicture(pictureData);
-        picture.setAnchor(new Rectangle(0, 0, pageSize.width, pageSize.height));
     }
 }
