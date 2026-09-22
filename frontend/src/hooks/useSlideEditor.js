@@ -130,10 +130,11 @@ export default function useSlideEditor({ canvasRef, initialSlides, onSlideStateC
 
     const currentSnapshot = history[history.length - 1];
     const nextHistory = history.slice(0, -1);
+    const previousSnapshot = nextHistory[nextHistory.length - 1] || slides[activeSlideIndex].image;
 
     setHistory(nextHistory);
     setRedoStack((currentRedoStack) => [...currentRedoStack, currentSnapshot]);
-    restoreCanvasSnapshot(canvas, nextHistory[nextHistory.length - 1]);
+    restoreCanvasSnapshot(canvas, previousSnapshot);
   };
 
   const redo = () => {
