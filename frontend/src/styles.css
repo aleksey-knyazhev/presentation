@@ -163,7 +163,7 @@ h1 {
   border: 1px solid #d9e0ea;
   border-radius: 8px;
   box-shadow: 0 18px 50px rgba(36, 49, 76, 0.08);
-  padding: 18px;
+  padding: 9px 18px 18px;
   width: 100%;
 }
 
@@ -222,7 +222,7 @@ h1 {
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 7px;
 }
 
 .control {
@@ -416,7 +416,7 @@ h1 {
   }
 
   .drawing-panel {
-    padding: 12px;
+    padding: 6px 12px 12px;
   }
 
   .toolbar {
