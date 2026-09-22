@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   createPresentation,
+  createPresentationFromTemplate as createPresentationFromTemplateRequest,
   deletePresentation as deletePresentationRequest,
   findPresentations,
   updatePresentation,
@@ -74,6 +75,17 @@ export default function usePresentations(drawingCanvasRef) {
     }
   };
 
+  const addPresentationFromTemplate = async (templateId) => {
+    try {
+      const savedPresentation = await createPresentationFromTemplateRequest(templateId);
+      setPresentations((currentPresentations) => [...currentPresentations, savedPresentation]);
+      return savedPresentation;
+    } catch (error) {
+      console.error('Ошибка создания презентации по шаблону', error);
+      return null;
+    }
+  };
+
   const deletePresentation = async (presentationId) => {
     try {
       await deletePresentationRequest(presentationId);
@@ -110,6 +122,7 @@ export default function usePresentations(drawingCanvasRef) {
   return {
     activePresentation,
     addPresentation,
+    addPresentationFromTemplate,
     closeEditor,
     deletePresentation,
     openPresentation,

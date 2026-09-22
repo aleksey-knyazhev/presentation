@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ru.presentation.dto.PresentationDto;
 import ru.presentation.dto.TemplateDto;
 import ru.presentation.dto.TemplatePreviewInfoDto;
+import ru.presentation.mappers.SlideMapper;
 import ru.presentation.mappers.TemplateMapper;
+import ru.presentation.services.PresentationService;
 import ru.presentation.services.TemplateService;
 
 import java.io.IOException;
@@ -26,10 +29,19 @@ public class TemplateController {
 
     private final TemplateService templateService;
     private final TemplateMapper templateMapper;
+    private final PresentationService presentationService;
+    private final SlideMapper slideMapper;
 
-    public TemplateController(TemplateService templateService, TemplateMapper templateMapper) {
+    public TemplateController(
+            TemplateService templateService,
+            TemplateMapper templateMapper,
+            PresentationService presentationService,
+            SlideMapper slideMapper
+    ) {
         this.templateService = templateService;
         this.templateMapper = templateMapper;
+        this.presentationService = presentationService;
+        this.slideMapper = slideMapper;
     }
 
     @GetMapping
@@ -52,6 +64,11 @@ public class TemplateController {
     @GetMapping("/{id}/preview-info")
     public TemplatePreviewInfoDto getPreviewInfo(@PathVariable Long id) throws IOException {
         return new TemplatePreviewInfoDto(templateService.countPreviewPages(id));
+    }
+
+    @PostMapping("/{id}/presentations")
+    public PresentationDto createPresentation(@PathVariable Long id) throws IOException {
+        return slideMapper.toDto(presentationService.createFromTemplate(id));
     }
 
     @DeleteMapping("/{id}")

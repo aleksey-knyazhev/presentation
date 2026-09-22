@@ -72,3 +72,8 @@ export const createTemplatePreview = (templateId, slideIndex = 0) =>
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ templateId, slideIndex }),
   });
+
+export const createPresentationFromTemplate = (templateId) =>
+  requestJson(`/api/templates/${templateId}/presentations`, {
+    method: 'POST',
+  });

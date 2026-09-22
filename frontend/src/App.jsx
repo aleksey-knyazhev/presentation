@@ -23,6 +23,7 @@ export default function App() {
   const {
     activePresentation,
     addPresentation,
+    addPresentationFromTemplate,
     closeEditor,
     deletePresentation,
     openPresentation,
@@ -140,7 +141,11 @@ export default function App() {
   };
 
   const createPresentationFromTemplate = async () => {
-    const savedPresentation = await addPresentation();
+    if (!previewTemplate) {
+      return;
+    }
+
+    const savedPresentation = await addPresentationFromTemplate(previewTemplate.id);
     if (!savedPresentation) {
       return;
     }

@@ -23,6 +23,9 @@ import java.util.List;
 @Service
 public class PptxGeneratorService {
 
+    private static final int PREVIEW_WIDTH = 900;
+    private static final int PREVIEW_HEIGHT = 267;
+
     private final TemplateRepository templateRepository;
 
     public PptxGeneratorService(TemplateRepository templateRepository) {
@@ -62,26 +65,52 @@ public class PptxGeneratorService {
             throw new IllegalArgumentException("Файл шаблона пустой: " + templateId);
         }
 
-        try (XMLSlideShow ppt = new XMLSlideShow(new ByteArrayInputStream(templateBytes));
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (XMLSlideShow ppt = new XMLSlideShow(new ByteArrayInputStream(templateBytes))) {
             XSLFSlide slide = getOrCreateSlide(ppt, slideIndex);
             addPreviewText(slide, userText);
             addImage(ppt, slide, userImageBytes);
 
+            return renderSlideToPng(ppt, slide);
+        }
+    }
+
+    public List<byte[]> generateTemplateSlideImages(Long templateId) throws IOException {
+        Template template = templateRepository.findById(templateId)
+                .orElseThrow(() -> new IllegalArgumentException("Шаблон не найден: " + templateId));
+
+        byte[] templateBytes = template.getFileBytes();
+        if (templateBytes == null || templateBytes.length == 0) {
+            throw new IllegalArgumentException("Файл шаблона пустой: " + templateId);
+        }
+
+        try (XMLSlideShow ppt = new XMLSlideShow(new ByteArrayInputStream(templateBytes))) {
+            return ppt.getSlides().stream()
+                    .map(slide -> renderSlideToPngUnchecked(ppt, slide))
+                    .toList();
+        }
+    }
+
+    private byte[] renderSlideToPngUnchecked(XMLSlideShow ppt, XSLFSlide slide) {
+        try {
+            return renderSlideToPng(ppt, slide);
+        } catch (IOException e) {
+            throw new IllegalStateException("Не удалось создать изображение слайда", e);
+        }
+    }
+
+    private byte[] renderSlideToPng(XMLSlideShow ppt, XSLFSlide slide) throws IOException {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Dimension pageSize = ppt.getPageSize();
-            float scale = 2.0f;
-            BufferedImage image = new BufferedImage(
-                    Math.round(pageSize.width * scale),
-                    Math.round(pageSize.height * scale),
-                    BufferedImage.TYPE_INT_ARGB
-            );
+            double scaleX = (double) PREVIEW_WIDTH / pageSize.width;
+            double scaleY = (double) PREVIEW_HEIGHT / pageSize.height;
+            BufferedImage image = new BufferedImage(PREVIEW_WIDTH, PREVIEW_HEIGHT, BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics = image.createGraphics();
             try {
                 graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
                 graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                graphics.scale(scale, scale);
+                graphics.scale(scaleX, scaleY);
                 slide.draw(graphics);
             } finally {
                 graphics.dispose();
